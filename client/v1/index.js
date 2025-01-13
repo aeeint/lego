@@ -29,8 +29,8 @@ console.log(MY_FAVORITE_DEALERS[0]);
 // 0. I have 2 favorite lego sets shopping communities stored in MY_FAVORITE_DEALERS variable
 // 1. Create a new variable and assign it the link of the lego set with the highest reduction I can find on these 2 websites
 // 2. Log the variable
-var HighestReduction = "https://www.dealabs.com/bons-plans/75-sur-la-gamme-lego-mario-parthenay-79-2972397";
-console.log(HighestReduction);
+var HIGHEST_REDUCTION = "https://www.dealabs.com/bons-plans/75-sur-la-gamme-lego-mario-parthenay-79-2972397";
+console.log(HIGHEST_REDUCTION);
 
 /**
  * 🧱
@@ -44,11 +44,14 @@ console.log(HighestReduction);
 // 🎯 TODO 2: Number of deals
 // 1. Create a variable and assign it the number of deals
 // 2. Log the variable
+var NUMBER_OF_DEALS = deals.length;
+console.log(NUMBER_OF_DEALS);
 
 // 🎯 TODO 3: Website name
 // 1. Create a variable and assign it the list of shopping community name only
 // 2. Log the variable
 // 3. Log how many shopping communities we have
+
 
 // 🎯 TODO 4: Sort by price
 // 1. Create a function to sort the deals by price
