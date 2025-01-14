@@ -59,7 +59,13 @@ console.log(SHOPPING_COMMUNITY_NAME);
 // 1. Create a function to sort the deals by price
 // 2. Create a variable and assign it the list of sets by price from lowest to highest
 // 3. Log the variable
-
+function Sorting_Price(deals) {
+  return deals.sort((deals_a, deals_b) => {
+    return deals_a.price - deals_b.price; // Retour explicite
+  });
+}
+const SORTED_DEALS = Sorting_Price(deals);
+console.table(SORTED_DEALS);
 // 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
 // 2. Create a variable and assign it the list of deals by date from recent to old
