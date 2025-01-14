@@ -61,15 +61,24 @@ console.log(SHOPPING_COMMUNITY_NAME);
 // 3. Log the variable
 function Sorting_Price(deals) {
   return deals.sort((deals_a, deals_b) => {
-    return deals_a.price - deals_b.price; // Retour explicite
+    return deals_a.price - deals_b.price;
   });
 }
-const SORTED_DEALS = Sorting_Price(deals);
-console.table(SORTED_DEALS);
+const SORTED_DEALS_PRICE = Sorting_Price(deals);
+console.table(SORTED_DEALS_PRICE);
+
 // 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
 // 2. Create a variable and assign it the list of deals by date from recent to old
 // 3. Log the variable
+
+function Sorting_Date(deals) {
+  return deals.sort((deals_a, deals_b) => {
+    return new Date(deals_b.published) - new Date(deals_a.published);
+  });
+}
+const SORTED_DEALS_DATE = Sorting_Date(deals);
+console.table(SORTED_DEALS_DATE);
 
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
