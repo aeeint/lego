@@ -45,14 +45,14 @@ console.log(HIGHEST_REDUCTION);
 // 1. Create a variable and assign it the number of deals
 // 2. Log the variable
 var NUMBER_OF_DEALS = deals.length;
-console.log(NUMBER_OF_DEALS);
+console.log("Number of deals : ",NUMBER_OF_DEALS);
 
 // 🎯 TODO 3: Website name
 // 1. Create a variable and assign it the list of shopping community name only
 // 2. Log the variable
 // 3. Log how many shopping communities we have
 const SHOPPING_COMMUNITY_NAME = [...new Set(deals.map(name => name.community))];
-console.log(SHOPPING_COMMUNITY_NAME);
+console.log("Shopping community name : ",SHOPPING_COMMUNITY_NAME);
 //map : créer tableau, Set : élimine les doublons, [...new Set()] : convertir le Set en tableau
 
 // 🎯 TODO 4: Sort by price
@@ -65,7 +65,7 @@ function Sorting_Price(deals) {
   });
 }
 const SORTED_DEALS_PRICE = Sorting_Price(deals);
-console.table(SORTED_DEALS_PRICE);
+console.table("Deals sorted by price : ",SORTED_DEALS_PRICE);
 
 // 🎯 TODO 5: Sort by date
 // 1. Create a function to sort the deals by date
@@ -78,17 +78,24 @@ function Sorting_Date(deals) {
   });
 }
 const SORTED_DEALS_DATE = Sorting_Date(deals);
-console.table(SORTED_DEALS_DATE);
+console.table("Deals sorted by date : ",SORTED_DEALS_DATE);
 
 // 🎯 TODO 6: Filter a specific percentage discount range
 // 1. Filter the list of deals between 50% and 75%
 // 2. Log the list
 const DISCOUNT = deals.filter(deal => deal.discount >= 50 && deal.discount <= 75);
-console.table(DISCOUNT);
+console.table("Discount between 50% and 75% : ",DISCOUNT);
 
 // 🎯 TODO 7: Average percentage discount
 // 1. Determine the average percentage discount of the deals
 // 2. Log the average
+let Average = 0;
+
+deals.forEach((deal) => {
+  Average += deal.discount;
+});
+
+console.log("Average percentage discount : ",Average/deals.length); 
 
 /**
  * 🏎
