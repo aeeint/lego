@@ -509,6 +509,9 @@ camera.favorite = true;
 
 // 1. Log `sealedCamera` and `camera` variables
 // 2. What do you notice?
+console.log(sealedCamera);
+console.log(camera);
+//Both are declared as favorite
 
 // we make (again) a new assignment again
 sealedCamera = {
@@ -520,9 +523,14 @@ sealedCamera = {
 };
 
 // 3. Update `camera` property with `favorite` to true WITHOUT changing sealedCamera properties
+let camera2 = { ...sealedCamera };
 
+camera2.favorite = true;
 
-// 🎯 TODO 11: Compute the profitability
+console.log(sealedCamera);
+console.log(camera2);
+
+// 🎯 TODO 16: Compute the profitability
 // From a specific deal called `deal`
 const deal = {
   'title':  'La caméra Hommage à Walt Disney',
