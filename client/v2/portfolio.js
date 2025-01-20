@@ -157,3 +157,37 @@ document.addEventListener('DOMContentLoaded', async () => {
   setCurrentDeals(deals);
   render(currentDeals, currentPagination);
 });
+
+// Feature 1 - Browse pages
+selectPage.addEventListener('change', async (event) => {
+  const deals = await fetchDeals(parseInt(event.target.value));
+
+  setCurrentDeals(deals);
+  render(currentDeals, currentPagination);
+});
+
+// Feature 2 - Filter by best discount
+const filterDealsByDiscount = (deals) => {
+  return deals.filter(deal => {
+    return parseFloat(deal.discount) > 20;
+  });
+};
+const filterDiscountBtn = document.getElementById('filter-discount');
+
+filterDiscountBtn.addEventListener('click', () => {
+  const filteredDeals = filterDealsByDiscount(currentDeals);
+  renderDeals(filteredDeals);
+});
+
+//Feature 3 - Filter by most commented
+const filterDealsByComments = (deals) => {
+  return deals.filter(deal => {
+    return deal.comments >= 5;
+  });
+};
+const filterCommentsBtn = document.getElementById('filter-commented');
+
+filterCommentsBtn.addEventListener('click', () => {
+  const filteredDeals = filterDealsByComments(currentDeals);
+  renderDeals(filteredDeals);
+});
