@@ -204,3 +204,29 @@ filterHotDealsBtn.addEventListener('click', () => {
   const filteredDeals = filterDealsByHotDeals(currentDeals);
   renderDeals(filteredDeals);
 });
+
+// Feature 5 - Sort by price
+const sortByPriceAscending = (deals) => {
+  return deals.sort((a, b) => {
+    return parseFloat(a.price) - parseFloat(b.price);
+  });
+};
+
+const sortByPriceDescending = (deals) => {
+  return deals.sort((a, b) => {
+    return parseFloat(b.price) - parseFloat(a.price);
+  });
+};
+
+document.getElementById('sort-select').addEventListener('change', function() {
+  const selectedOption = this.value;
+
+  if (selectedOption === 'price-asc') {
+    const sortedDeals = sortByPriceAscending(currentDeals);
+    renderDeals(sortedDeals);
+  }
+  if (selectedOption === 'price-desc') {
+    const sortedDeals = sortByPriceDescending(currentDeals);
+    renderDeals(sortedDeals);
+  }
+});
