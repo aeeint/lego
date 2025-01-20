@@ -546,8 +546,6 @@ const profitability =Math.max(...prices)-deal.retail;
 console.log(`potential highest profitability : ${profitability.toFixed(2)} `);
 
 
-
-
 /**
  * 🎬
  * The End: last thing to do
