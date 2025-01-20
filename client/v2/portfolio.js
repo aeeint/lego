@@ -230,3 +230,29 @@ document.getElementById('sort-select').addEventListener('change', function() {
     renderDeals(sortedDeals);
   }
 });
+
+//Feature 6 - Sort by date
+const Recently = (deals) => {
+  return deals.sort((a, b) => {
+    return new Date (a.published) - new Date (b.published);
+  });
+};
+
+const Anciently = (deals) => {
+  return deals.sort((a, b) => {
+    return new Date (b.published) - new Date (a.published);
+  });
+};
+
+document.getElementById('sort-select').addEventListener('change', function() {
+  const selectedOption = this.value;
+
+  if (selectedOption === 'date-asc') {
+    const sortedDeals = Anciently(currentDeals);
+    renderDeals(sortedDeals);
+  }
+  if (selectedOption === 'date-desc') {
+    const sortedDeals = Recently(currentDeals);
+    renderDeals(sortedDeals);
+  }
+});
