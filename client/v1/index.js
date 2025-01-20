@@ -541,6 +541,17 @@ const deal = {
 
 // 1. Compute the potential highest profitability based on the VINTED items
 // 2. Log the value
+// Initialiser une variable pour le prix le plus élevé
+let highestPrice = 0;
+
+for (const item of VINTED) {
+  if (item.title.includes(deal.title) && parseFloat(item.price) > highestPrice) {
+    highestPrice = parseFloat(item.price);
+  }
+}
+const profitability = highestPrice > deal.price ? highestPrice - deal.price : 0;
+
+console.log(`potential highest profitability : ${profitability.toFixed(2)} `);
 
 
 
