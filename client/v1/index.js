@@ -467,9 +467,17 @@ console.log(`25e percentile (p25): ${p25Price.toFixed(2)}`);
 // // 1. Log if we have very old items (true or false)
 // // A very old item is an item `published` more than 3 weeks ago.
 
+const today = new Date();
+const hasVeryOldItems = VINTED.some(item => new Date(item.published) < new Date(today.getFullYear(), today.getMonth(), today.getDate() - 21));
+
+console.log(`old articles ? ${hasVeryOldItems}`);
+
+
 // 🎯 TODO 13: Find a specific item
 // 1. Find the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the item
+
+
 
 // 🎯 TODO 14: Delete a specific item
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
