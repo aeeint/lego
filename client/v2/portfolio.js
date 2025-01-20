@@ -169,7 +169,7 @@ selectPage.addEventListener('change', async (event) => {
 // Feature 2 - Filter by best discount
 const filterDealsByDiscount = (deals) => {
   return deals.filter(deal => {
-    return parseFloat(deal.discount) > 20;
+    return parseFloat(deal.discount) > 50;
   });
 };
 const filterDiscountBtn = document.getElementById('filter-discount');
@@ -182,12 +182,25 @@ filterDiscountBtn.addEventListener('click', () => {
 //Feature 3 - Filter by most commented
 const filterDealsByComments = (deals) => {
   return deals.filter(deal => {
-    return deal.comments >= 5;
+    return deal.comments >= 15;
   });
 };
 const filterCommentsBtn = document.getElementById('filter-commented');
 
 filterCommentsBtn.addEventListener('click', () => {
   const filteredDeals = filterDealsByComments(currentDeals);
+  renderDeals(filteredDeals);
+});
+
+//Feature 4 - Filter by hot deals
+const filterDealsByHotDeals = (deals) => {
+  return deals.filter(deal => {
+    return deal.temperature >= 100;
+  });
+};
+const filterHotDealsBtn = document.getElementById('filter-hot-deals');
+
+filterHotDealsBtn.addEventListener('click', () => {
+  const filteredDeals = filterDealsByHotDeals(currentDeals);
   renderDeals(filteredDeals);
 });
