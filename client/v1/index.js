@@ -119,6 +119,19 @@ console.log("Average percentage discount : ",Average/deals.length);
 //
 // 2. Log the variable
 // 3. Log the number of deals by community
+const communities = {};
+for (let deal of deals) {
+  if (!communities[deal.community]) {
+      communities[deal.community] = [];
+  }
+  communities[deal.community].push(deal);
+}
+
+console.log(communities);
+
+for (let community in communities) {
+  console.log(`${community} a ${communities[community].length} transactions`);
+}
 
 // 🎯 TODO 9: Sort by price for each community
 // 1. For each community, sort the deals by discount price, from highest to lowest
@@ -432,7 +445,7 @@ const VINTED = [
 // 1. Delete the item with the uuid `f2c5377c-84f9-571d-8712-98902dcbb913`
 // 2. Log the new list of items
 
-// 🎯 TODO 5: Save a favorite item
+// 🎯 TODO 15: Save a favorite item
 // We declare and assign a variable called `sealedCamera`
 let sealedCamera = {
   link: "https://www.vinted.fr/items/5563396347-lego-43230-omaggio-a-walter-disney-misb",
