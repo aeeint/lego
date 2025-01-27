@@ -79,7 +79,7 @@ const renderDeals = deals => {
       return `
       <div class="deal" id=${deal.uuid}>
         <span>${deal.id}</span>
-        <a href="${deal.link}">${deal.title}</a>
+        <a href="${deal.link}"target="_blank" rel="noopener noreferrer">${deal.title}</a>
         <span>${deal.price}</span>
       </div>
     `;
@@ -88,6 +88,7 @@ const renderDeals = deals => {
 
   div.innerHTML = template;
   fragment.appendChild(div);
+  const sectionDeals = document.querySelector('#deals');
   sectionDeals.innerHTML = '<h2>Deals</h2>';
   sectionDeals.appendChild(fragment);
 };
@@ -286,7 +287,7 @@ const fetchVintedSales = async (setId) => {
 
     const data = await response.json();
     
-    //console.log("Data received from API:", data); // Vérifier les données
+    console.log("Data received from API:", data); // Vérifier les données
 
     return data.data.result || [];
   } catch (error) {
@@ -436,4 +437,19 @@ document.querySelector('#lego-set-id-select').addEventListener('change', async (
   const lifetime = calculateLifetimeValue(vintedSales);
   renderLifetimeValue(lifetime);
   renderVintedSales(vintedSales);
+});
+
+// Feature 11 - Open product link
+// Add this code to renderDeals :
+{/* <div class="deal" id=${deal.uuid}>
+        <span>${deal.id}</span>
+        <a href="${deal.link}"target="_blank" rel="noopener noreferrer">${deal.title}</a>
+        <span>${deal.price}</span>
+      </div> */}
+document.querySelector('#show-select').addEventListener('change', async (event) => {
+  const pageSize = parseInt(event.target.value);
+  const deals = await fetchDeals(currentPagination.currentPage, pageSize);
+
+  setCurrentDeals(deals);
+  renderDeals(currentDeals); 
 });
