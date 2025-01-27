@@ -484,50 +484,6 @@ document.querySelector('#show-select').addEventListener('change', async (event) 
 
 // Feature 13 - Save as favorite
 
-const saveDealAsFavorite = (dealId, deals) => {
-  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-
-  if (favorites.some(favorite => favorite.uuid === dealId)) {
-    alert("This deal is already in your favorites!");
-    return;
-  }
-
-  const deal = deals.find(d => d.uuid === dealId);
-  if (deal) {
-    favorites.push(deal); 
-    localStorage.setItem('favorites', JSON.stringify(favorites)); 
-    alert("Deal added to favorites!");
-  }
-};
-
-const renderFavoriteDeals = () => {
-  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-  const favoritesContainer = document.querySelector('#favoritesContainer');
-
-  if (!favoritesContainer) {
-    console.error('Favorites container not found in the DOM.');
-    return;
-  }
-
-  if (favorites.length === 0) {
-    favoritesContainer.innerHTML = '<p>No favorite deals saved yet.</p>';
-    return;
-  }
-
-  const favoriteContent = favorites.map(favorite => `
-    <div class="favorite-deal" id="${favorite.uuid}">
-      <a href="${favorite.link}" target="_blank" rel="noopener noreferrer">${favorite.title}</a>
-      <span>${favorite.price} €</span>
-    </div>
-  `).join('');
-
-  favoritesContainer.innerHTML = favoriteContent;
-};
-
-document.addEventListener('DOMContentLoaded', () => {
-  renderFavoriteDeals(); 
-});
-
 const toggleFavoriteDeal = (dealId, deals) => {
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
@@ -545,5 +501,19 @@ const toggleFavoriteDeal = (dealId, deals) => {
 };
 
 // Feature 14 - Filter by favorite
+const filterFavoriteDeals = () => {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+  if (favorites.length === 0) {
+    alert("No favorite deals to display.");
+    return;
+  }
+
+  renderDeals(favorites);
+};
+
+document.querySelector('#filter-favorites').addEventListener('click', () => {
+  filterFavoriteDeals();
+});
 
 // Feature 15 - Usable and pleasant UX
