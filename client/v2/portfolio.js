@@ -394,3 +394,46 @@ document.querySelector('#lego-set-id-select').addEventListener('change', async (
   renderPriceStatistics(stats);
   renderVintedSales(vintedSales);
 });
+// Feature 10 - Lifetime value
+
+const calculateLifetimeValue = (sales) => {
+  if (sales.length === 0) {
+    return 0; // Pas de ventes, pas de durée
+  }
+
+  const dates = sales
+    .map(sale => new Date(sale.published)) // Convertir les dates en objets Date
+    .filter(date => !isNaN(date)); // Filtrer les dates invalides
+
+  if (dates.length === 0) {
+    return 0; // Pas de dates valides trouvées
+  }
+  // Trouver la date la plus ancienne (minDate) et la plus récente (maxDate)
+  const minDate = new Date(Math.min(...dates));
+  const maxDate = new Date(Math.max(...dates));
+
+  // Calculer la différence en jours entre maxDate et minDate
+  const lifetimeInDays = Math.ceil((maxDate - minDate) / (1000 * 60 * 60 * 24));
+
+  return lifetimeInDays;
+};
+
+const renderLifetimeValue = (lifetime) => {
+  const lifetimeElement = document.querySelector('#lifetimeValue');
+
+  if (lifetimeElement) {
+    lifetimeElement.textContent = `${lifetime} days`;
+  }
+};
+
+document.querySelector('#lego-set-id-select').addEventListener('change', async (event) => {
+  const setId = event.target.value;
+  if (!setId) {
+    console.error("No Lego set ID selected.");
+    return;
+  }
+  const vintedSales = await fetchVintedSales(setId);
+  const lifetime = calculateLifetimeValue(vintedSales);
+  renderLifetimeValue(lifetime);
+  renderVintedSales(vintedSales);
+});
