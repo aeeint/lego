@@ -350,3 +350,47 @@ document.querySelector('#lego-set-id-select').addEventListener('change', async (
 //    salesContainerElement.innerHTML = '<p>No sales found for the selected Lego set.</p>';
 //    return;
 //  }
+
+// Feature 9 - average, p5, p25 and p50 price value indicators
+
+const calculatePriceStatistics = (sales) => {
+  if (sales.length === 0) {
+    return { average: 0, p5: 0, p25: 0, p50: 0 };
+  }
+  const prices = sales.map(sale => parseFloat(sale.price)).sort((a, b) => a - b);
+
+  const average = prices.reduce((sum, price) => sum + price, 0) / prices.length;
+
+  const p5 = prices[Math.floor(prices.length * 0.05)] || prices[0];
+  const p25 = prices[Math.floor(prices.length * 0.25)] || prices[0];
+  const p50 = prices[Math.floor(prices.length * 0.50)] || prices[0];
+
+  return { average, p5, p25, p50 };
+};
+
+const renderPriceStatistics = (stats) => {
+  const averageElement = document.querySelector('#averagePrice');
+  const p5Element = document.querySelector('#p5Price');
+  const p25Element = document.querySelector('#p25Price');
+  const p50Element = document.querySelector('#p50Price');
+
+  // Vérifier que les éléments existent avant de définir leur contenu
+  if (averageElement) averageElement.textContent = stats.average.toFixed(2) + " €";
+  if (p5Element) p5Element.textContent = stats.p5.toFixed(2) + " €";
+  if (p25Element) p25Element.textContent = stats.p25.toFixed(2) + " €";
+  if (p50Element) p50Element.textContent = stats.p50.toFixed(2) + " €";
+};
+
+document.querySelector('#lego-set-id-select').addEventListener('change', async (event) => {
+  const setId = event.target.value; 
+
+  if (!setId) {
+    console.error("No Lego set ID selected.");
+    return;
+  }
+
+  const vintedSales = await fetchVintedSales(setId);
+  const stats = calculatePriceStatistics(vintedSales);
+  renderPriceStatistics(stats);
+  renderVintedSales(vintedSales);
+});
