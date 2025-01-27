@@ -74,13 +74,25 @@ const fetchDeals = async (page = 1, size = 6) => {
 const renderDeals = deals => {
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
+
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
   const template = deals
     .map(deal => {
+      // Vérifier si le deal est déjà dans les favoris
+      const isFavorite = favorites.some(favorite => favorite.uuid === deal.uuid);
       return `
-      <div class="deal" id=${deal.uuid}>
+      <div class="deal" id="${deal.uuid}">
         <span>${deal.id}</span>
-        <a href="${deal.link}"target="_blank" rel="noopener noreferrer">${deal.title}</a>
-        <span>${deal.price}</span>
+        <a href="${deal.link}" target="_blank" rel="noopener noreferrer">${deal.title}</a>
+        <span>${deal.price} €</span>
+        <span 
+          class="favorite-btn" 
+          data-id="${deal.uuid}" 
+          style="cursor: pointer; color: ${isFavorite ? 'red' : 'black'};"
+        >
+          ❤
+        </span>
       </div>
     `;
     })
@@ -91,6 +103,15 @@ const renderDeals = deals => {
   const sectionDeals = document.querySelector('#deals');
   sectionDeals.innerHTML = '<h2>Deals</h2>';
   sectionDeals.appendChild(fragment);
+
+  const favoriteButtons = div.querySelectorAll('.favorite-btn');
+  favoriteButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      const dealId = event.target.getAttribute('data-id');
+      toggleFavoriteDeal(dealId, deals);
+      renderDeals(deals); 
+    });
+  });
 };
 
 /**
@@ -460,8 +481,68 @@ document.querySelector('#show-select').addEventListener('change', async (event) 
       <a href="${sale.link}" target="_blank" rel="noopener noreferrer">${sale.title}</a>
       <span>Price: ${sale.price} €</span>
     </div> */}
-    
+
 // Feature 13 - Save as favorite
+
+const saveDealAsFavorite = (dealId, deals) => {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+  if (favorites.some(favorite => favorite.uuid === dealId)) {
+    alert("This deal is already in your favorites!");
+    return;
+  }
+
+  const deal = deals.find(d => d.uuid === dealId);
+  if (deal) {
+    favorites.push(deal); 
+    localStorage.setItem('favorites', JSON.stringify(favorites)); 
+    alert("Deal added to favorites!");
+  }
+};
+
+const renderFavoriteDeals = () => {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  const favoritesContainer = document.querySelector('#favoritesContainer');
+
+  if (!favoritesContainer) {
+    console.error('Favorites container not found in the DOM.');
+    return;
+  }
+
+  if (favorites.length === 0) {
+    favoritesContainer.innerHTML = '<p>No favorite deals saved yet.</p>';
+    return;
+  }
+
+  const favoriteContent = favorites.map(favorite => `
+    <div class="favorite-deal" id="${favorite.uuid}">
+      <a href="${favorite.link}" target="_blank" rel="noopener noreferrer">${favorite.title}</a>
+      <span>${favorite.price} €</span>
+    </div>
+  `).join('');
+
+  favoritesContainer.innerHTML = favoriteContent;
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  renderFavoriteDeals(); 
+});
+
+const toggleFavoriteDeal = (dealId, deals) => {
+  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+
+  const dealIndex = favorites.findIndex(favorite => favorite.uuid === dealId);
+
+  if (dealIndex >= 0) {
+    favorites.splice(dealIndex, 1);
+  } else {
+    const deal = deals.find(d => d.uuid === dealId);
+    if (deal) {
+      favorites.push(deal);
+    }
+  }
+  localStorage.setItem('favorites', JSON.stringify(favorites));
+};
 
 // Feature 14 - Filter by favorite
 
