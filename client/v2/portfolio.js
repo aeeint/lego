@@ -321,9 +321,9 @@ const renderVintedSales = (sales) => {
 
  const salesContent = sales.map(sale => `
    <div class="vinted-sale" id="${sale.uuid}">
-     <a href="${sale.link}" target="_blank">${sale.title}</a>
-     <span> ${sale.price} €</span>
-   </div>
+      <a href="${sale.link}" target="_blank" rel="noopener noreferrer">${sale.title}</a>
+      <span>Price: ${sale.price} €</span>
+    </div>
  `).join('');
 
  salesContainerElement.innerHTML = salesContent;
@@ -342,7 +342,7 @@ document.querySelector('#lego-set-id-select').addEventListener('change', async (
 });
 
 //Feature 8 - Specific indicators
-// To displey the total number of lego set in function of the lego set id : 
+// To display the total number of lego set in function of the lego set id in renderVintedSales(): 
 // nbSales.textContent = sales.length;
 
 //  salesContainerElement.innerHTML = '';
@@ -453,3 +453,16 @@ document.querySelector('#show-select').addEventListener('change', async (event) 
   setCurrentDeals(deals);
   renderDeals(currentDeals); 
 });
+
+// Feature 12 - Open sold item link
+// Add this code to renderVintedSales :
+{/* <div class="vinted-sale" id="${sale.uuid}">
+      <a href="${sale.link}" target="_blank" rel="noopener noreferrer">${sale.title}</a>
+      <span>Price: ${sale.price} €</span>
+    </div> */}
+    
+// Feature 13 - Save as favorite
+
+// Feature 14 - Filter by favorite
+
+// Feature 15 - Usable and pleasant UX
