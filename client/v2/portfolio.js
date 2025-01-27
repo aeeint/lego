@@ -270,21 +270,25 @@ document.getElementById('sort-select').addEventListener('change', function() {
 //Feature 7 - Display Vinted sales
 /**
  * Fetch sales from api 
- * @param  {Number} setId 
- * @param  {Number} [page=1] 
- * @param  {Number} [size=12] 
- * @return {Object}
+ * @param  {String|Number} setId  
+ * @return {Array} 
  */
 
 const fetchVintedSales = async (setId) => {
   try {
     const url = `https://lego-api-blue.vercel.app/sales?id=${setId}`;
     const response = await fetch(url);
+
+    if (!response.ok) {
+      console.error("Failed to fetch sales. HTTP status:", response.status);
+      return [];
+    }
+
     const data = await response.json();
     
     //console.log("Data received from API:", data); // Vérifier les données
 
-    return data.success ? data.data.result : []; 
+    return data.data.result || [];
   } catch (error) {
     console.error("Error fetching Vinted sales:", error);
     return [];
@@ -296,32 +300,43 @@ const fetchVintedSales = async (setId) => {
  * @param  {Array} sales
  */
 const renderVintedSales = (sales) => {
-  const salesContainer = document.createElement('div');
-  salesContainer.className = 'vinted-sales';
-
-  if (!Array.isArray(sales)) {
-    console.error('Expected an array but received:', sales);
-    return; 
+  // Vérifier si un conteneur existe pour afficher les ventes
+  const salesContainerElement = document.querySelector('#salesContainer');
+  salesContainer.innerHTML = '';
+  if (!salesContainerElement) {
+    console.error('Sales container element not found in the DOM.');
+    return;
   }
-  
+
+  // Si aucune vente n'est disponible, afficher un message
+  if (sales.length === 0) {
+    salesContainerElement.innerHTML = '<p>No sales found for the selected Lego set.</p>';
+    return;
+  }
+
+  // Générer le contenu HTML pour chaque vente
   const salesContent = sales.map(sale => `
-    <div class="vinted-sale" id=${sale.uuid}>
-        <a href="${sale.link}">${sale.title}</a>
-        <span>${sale.price}</span>
-      </div>
+    <div class="vinted-sale" id="${sale.uuid}">
+      <a href="${sale.link}" target="_blank">${sale.title}</a>
+      <span> ${sale.price} €</span>
+    </div>
   `).join('');
 
-  salesContainer.innerHTML = salesContent;
-  const salesContainerElement = document.querySelector('#salesContainer');
-  salesContainerElement.innerHTML = ''; // Clear previous sales
-  salesContainerElement.appendChild(salesContainer);
+  // Ajouter le contenu généré dans le conteneur
+  salesContainerElement.innerHTML = salesContent;
 };
 
+// Ajouter un listener sur le sélecteur de Lego Set ID
 document.querySelector('#lego-set-id-select').addEventListener('change', async (event) => {
-  const setId = event.target.value;
-  fetchVintedSales(setId)
-    .then(vintedSales => renderVintedSales(vintedSales))
-    .catch(error => console.error('Failed to fetch or render sales:', error));
+  const setId = event.target.value; // Récupérer l'ID sélectionné
+  if (!setId) {
+    console.error("No Lego set ID selected.");
+    return;
+  }
+
+  // Récupérer les ventes pour cet ID et les afficher
+  const vintedSales = await fetchVintedSales(setId);
+  renderVintedSales(vintedSales);
 });
 
 //Feature 8 - Specific indicators
