@@ -160,7 +160,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // Feature 1 - Browse pages
 selectPage.addEventListener('change', async (event) => {
-  const deals = await fetchDeals(parseInt(event.target.value));
+  const page = parseInt(event.target.value); // Récupère la page sélectionnée
+  const pageSize = parseInt(selectShow.value); // Garde la taille actuelle
+
+  const deals = await fetchDeals(page, pageSize); // Récupère les deals pour cette page
+
+  setCurrentDeals(deals);
+  render(currentDeals, currentPagination);
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  const deals = await fetchDeals();
 
   setCurrentDeals(deals);
   render(currentDeals, currentPagination);
@@ -313,3 +323,5 @@ document.querySelector('#lego-set-id-select').addEventListener('change', async (
     .then(vintedSales => renderVintedSales(vintedSales))
     .catch(error => console.error('Failed to fetch or render sales:', error));
 });
+
+//Feature 8 - Specific indicators
