@@ -482,6 +482,7 @@ document.querySelector('#show-select').addEventListener('change', async (event) 
       <span>Price: ${sale.price} €</span>
     </div> */}
 
+    
 // Feature 13 - Save as favorite
 
 const toggleFavoriteDeal = (dealId, deals) => {
@@ -515,5 +516,3 @@ const filterFavoriteDeals = () => {
 document.querySelector('#filter-favorites').addEventListener('click', () => {
   filterFavoriteDeals();
 });
-
-// Feature 15 - Usable and pleasant UX
