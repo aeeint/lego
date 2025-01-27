@@ -299,44 +299,54 @@ const fetchVintedSales = async (setId) => {
  * Render sales
  * @param  {Array} sales
  */
+
 const renderVintedSales = (sales) => {
-  // Vérifier si un conteneur existe pour afficher les ventes
-  const salesContainerElement = document.querySelector('#salesContainer');
-  salesContainer.innerHTML = '';
-  if (!salesContainerElement) {
-    console.error('Sales container element not found in the DOM.');
-    return;
-  }
+ const salesContainerElement = document.querySelector('#salesContainer');
+ const nbSales = document.querySelector('#nbSales'); // Sélecteur pour le nombre total de ventes
 
-  // Si aucune vente n'est disponible, afficher un message
-  if (sales.length === 0) {
-    salesContainerElement.innerHTML = '<p>No sales found for the selected Lego set.</p>';
-    return;
-  }
+ if (!salesContainerElement) {
+   console.error('Sales container element not found in the DOM.');
+   return;
+ }
 
-  // Générer le contenu HTML pour chaque vente
-  const salesContent = sales.map(sale => `
-    <div class="vinted-sale" id="${sale.uuid}">
-      <a href="${sale.link}" target="_blank">${sale.title}</a>
-      <span> ${sale.price} €</span>
-    </div>
-  `).join('');
+ nbSales.textContent = sales.length;
 
-  // Ajouter le contenu généré dans le conteneur
-  salesContainerElement.innerHTML = salesContent;
+ salesContainerElement.innerHTML = '';
+
+ if (sales.length === 0) {
+   salesContainerElement.innerHTML = '<p>No sales found for the selected Lego set.</p>';
+   return;
+ }
+
+ const salesContent = sales.map(sale => `
+   <div class="vinted-sale" id="${sale.uuid}">
+     <a href="${sale.link}" target="_blank">${sale.title}</a>
+     <span> ${sale.price} €</span>
+   </div>
+ `).join('');
+
+ salesContainerElement.innerHTML = salesContent;
 };
 
-// Ajouter un listener sur le sélecteur de Lego Set ID
+
 document.querySelector('#lego-set-id-select').addEventListener('change', async (event) => {
-  const setId = event.target.value; // Récupérer l'ID sélectionné
+  const setId = event.target.value; 
   if (!setId) {
     console.error("No Lego set ID selected.");
     return;
   }
 
-  // Récupérer les ventes pour cet ID et les afficher
   const vintedSales = await fetchVintedSales(setId);
   renderVintedSales(vintedSales);
 });
 
 //Feature 8 - Specific indicators
+// To displey the total number of lego set in function of the lego set id : 
+// nbSales.textContent = sales.length;
+
+//  salesContainerElement.innerHTML = '';
+
+//  if (sales.length === 0) {
+//    salesContainerElement.innerHTML = '<p>No sales found for the selected Lego set.</p>';
+//    return;
+//  }
