@@ -3,9 +3,22 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>🧱 Lego | Predictability of a lego set deal</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   </head>
   <body>
-    <h1>Lego</h1>
+    <!-- Header avec logo et barre de recherche -->
+    <header>
+      <img src="static/images/logo.png" alt="Logo Lego">
+      <form id="search-form">
+        <input type="text" id="search-input" placeholder="Search for Lego sets...">
+        <button type="submit">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
+    </header>
+
+    <!-- Options Section -->
     <section id="options">
       <div id="show">
         <label for="show-select">Show:</label>
@@ -19,6 +32,7 @@
         <label for="page-select">Go to page:</label>
         <select name="page" id="page-select"> </select>
       </div>
+      <div id="pagination-container"></div>
       <div id="filters">
         <button type="button" id="filter-discount">By best discount</button>
         <button type="button" id="filter-commented">By most commented</button>
@@ -35,6 +49,8 @@
         </select>
       </div>
     </section>
+
+    <!-- Lego Sets Section -->
     <section id="lego">
       <h2>Lego sets</h2>
       <div>
@@ -42,6 +58,8 @@
         <select id="lego-set-id-select"></select> 
       </div>
     </section>
+
+    <!-- Indicators Section -->
     <section id="indicators">
       <h2>Indicators</h2>
       <div>
@@ -54,7 +72,7 @@
       </div>
       <div>
         <span>Average price</span>
-        <spani id="averagePrice">0</span>
+        <span id="averagePrice">0</span>
       </div>
       <div>
         <span>p5 sales price value</span>
@@ -73,11 +91,17 @@
         <span id="lifetimeValue">0 days</span>
       </div>
     </section>
-    <section id="deals"></section>
+
+    <!-- Deals Section -->
+    <section id="deals"></section>    
+
+    <!-- Sales Section -->
     <section id="sales">
       <h2>Sales</h2>
       <div id="salesContainer"></div>
     </section>
+
+    <!-- Scripts -->
     <script type="text/javascript" charset="UTF-8" src="utils.js"></script>
     <script type="text/javascript" charset="UTF-8" src="portfolio.js"></script>
   </body>

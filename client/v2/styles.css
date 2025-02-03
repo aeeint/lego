@@ -1,0 +1,182 @@
+/* Styles globaux */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Header */
+header {
+    display: flex;
+    align-items: center; /* Aligne verticalement le logo et la barre de recherche */
+    justify-content: space-between; /* Ajoute de l'espace entre les éléments */
+    background-color: #fff;
+    padding: 10px 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+/* Logo */
+header img {
+    max-width: 75px; /* Ajuster la taille du logo */
+    margin-right: 15px;
+}
+
+/* Formulaire de recherche */
+#search-form {
+    display: flex;
+    align-items: center; /* Aligne verticalement le champ et le bouton */
+    justify-content: center; /* Centre les éléments horizontalement */
+    position: absolute; /* Permet de positionner par rapport au document */
+    top: 20px; /* Distance du haut de la page */
+    left: 50%; /* Centre horizontalement par rapport à la largeur */
+    transform: translateX(-50%); /* Ajuste pour un centrage parfait horizontal */
+}
+/* Champ de recherche */
+#search-input {
+    padding: 7px 15px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 5px 0 0 5px; /* Coins arrondis gauche */
+    width: 350px; /* Largeur du champ de recherche */
+}
+
+/* Bouton de recherche avec uniquement une icône */
+#search-form button {
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    padding: 7px; /* Ajuste la taille du bouton */
+    cursor: pointer;
+    border-radius: 0 5px 5px 0; /* Coins arrondis à droite */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centre l'icône dans le bouton */
+    font-size: 16px; /* Taille de l'icône */
+    width: 40px; /* Bouton carré pour ne pas être trop large */
+    transition: background-color 0.3s ease;
+}
+
+/* Icône dans le bouton */
+#search-form button i {
+    font-size: 18px; /* Taille de la loupe */
+}
+
+/* Effet au survol du bouton */
+#search-form button:hover {
+    background-color: #0056b3;
+}
+
+/* Boutons */
+button {
+    background-color: #007BFF;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+/* Listes déroulantes */
+select {
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.deals-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Ajuste automatiquement les colonnes */
+  gap: 20px; /* Espace entre chaque card */
+  justify-content: center; /* Centre les cards horizontalement */
+  padding: 20px;
+  max-width: 1200px; /* Largeur maximale pour le conteneur */
+  margin: 0 auto; /* Centre le conteneur globalement */
+  margin-left: 200px;
+  box-sizing: border-box; /* Inclut le padding dans la largeur totale */
+}
+
+.deal-card {
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.2s ease-in-out;
+  height: 500px; /* Ajuste la hauteur */
+  width: 300px; /* Ajuste la largeur */
+  position: relative; /* Permet à .favorite-btn de se positionner correctement */
+}
+
+.deal-card:hover {
+  transform: translateY(-5px);
+}
+
+  
+  .deal-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    font-size: 14px;
+    font-weight: bold;
+  }
+  
+  .deal-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+  }
+  
+  .deal-info {
+    padding: 10px;
+    text-align: center;
+  }
+  
+  .deal-title {
+    font-size: 16px;
+    margin: 10px 0;
+  }
+  
+  .deal-price {
+    font-size: 18px;
+    color: #333;
+    font-weight: bold;
+    margin: 10px 0;
+  }
+  
+  .deal-button {
+    background-color: #ff6f00;
+    color: #fff;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    font-size: 16px;
+    border-radius: 5px;
+    margin: 10px;
+    transition: background-color 0.3s;
+  }
+  
+  .deal-button:hover {
+    background-color: #e65c00;
+  }
+  
+  .favorite-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  
+  

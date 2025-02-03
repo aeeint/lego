@@ -9,8 +9,8 @@ Search for specific deals
 
 This endpoint accepts the following optional query string parameters:
 
-- `page` - page of deals to return
-- `size` - number of deals to return
+- page - page of deals to return
+- size - number of deals to return
 
 GET https://lego-api-blue.vercel.app/sales
 
@@ -18,7 +18,7 @@ Search for current Vinted sales for a given lego set id
 
 This endpoint accepts the following optional query string parameters:
 
-- `id` - lego set id to return
+- id - lego set id to return
 */
 
 // current deals on the page
@@ -72,20 +72,33 @@ const fetchDeals = async (page = 1, size = 6) => {
  * @param  {Array} deals
  */
 const renderDeals = deals => {
+  const sectionDeals = document.querySelector('#deals');
+
+  if (!deals || deals.length === 0) {
+    sectionDeals.innerHTML = '<p>No deals found for the entered search criteria.</p>';
+    return;
+  }
+
   const fragment = document.createDocumentFragment();
   const div = document.createElement('div');
+  div.className = 'deals-container';
 
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
   const template = deals
     .map(deal => {
-      // Vérifier si le deal est déjà dans les favoris
       const isFavorite = favorites.some(favorite => favorite.uuid === deal.uuid);
       return `
-      <div class="deal" id="${deal.uuid}">
-        <span>${deal.id}</span>
-        <a href="${deal.link}" target="_blank" rel="noopener noreferrer">${deal.title}</a>
-        <span>${deal.price} €</span>
+      <div class="deal-card">
+        <div class="deal-header">
+          <span class="deal-id">${deal.id}</span>
+        </div>
+        <img src="${deal.photo || 'default-image.jpg'}" alt="${deal.title}" class="deal-image">
+        <div class="deal-info">
+          <h3 class="deal-title">${deal.title}</h3>
+          <p class="deal-price">${deal.price} €</p>
+        </div>
+        <button class="deal-button" data-link="${deal.link}">Je le veux !</button>
         <span 
           class="favorite-btn" 
           data-id="${deal.uuid}" 
@@ -100,9 +113,21 @@ const renderDeals = deals => {
 
   div.innerHTML = template;
   fragment.appendChild(div);
-  const sectionDeals = document.querySelector('#deals');
   sectionDeals.innerHTML = '<h2>Deals</h2>';
   sectionDeals.appendChild(fragment);
+
+  // Ajouter les gestionnaires d'événements ici
+  const dealButtons = div.querySelectorAll('.deal-button');
+  dealButtons.forEach(button => {
+    button.addEventListener('click', (event) => {
+      const link = event.target.getAttribute('data-link');
+      if (link) {
+        window.open(link, '_blank'); 
+      } else {
+        alert('Lien non disponible pour ce produit.');
+      }
+    });
+  });
 
   const favoriteButtons = div.querySelectorAll('.favorite-btn');
   favoriteButtons.forEach(button => {
@@ -114,6 +139,8 @@ const renderDeals = deals => {
   });
 };
 
+
+
 /**
  * Render page selector
  * @param  {Object} pagination
@@ -121,7 +148,7 @@ const renderDeals = deals => {
 const renderPagination = pagination => {
   const {currentPage, pageCount} = pagination;
   const options = Array.from(
-    {'length': pageCount},
+    { length: pageCount },
     (value, index) => `<option value="${index + 1}">${index + 1}</option>`
   ).join('');
 
@@ -179,6 +206,40 @@ document.addEventListener('DOMContentLoaded', async () => {
   setCurrentDeals(deals);
   render(currentDeals, currentPagination);
 });
+
+// Listener pour la soumission du formulaire de recherche
+document.getElementById('search-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  // Récupère l'ID saisi dans la barre de recherche
+  const dealId = document.getElementById('search-input').value.trim();
+
+  if (dealId === '') {
+    // Si la recherche est vide, afficher tous les deals
+    renderDeals(currentDeals);
+    return;
+  }
+
+  // Filtrer les deals pour ne garder que ceux avec l'ID saisi
+  const filteredDeals = currentDeals.filter(deal => deal.id === dealId);
+
+  if (filteredDeals.length === 0) {
+    alert('Aucun deal trouvé pour l\'ID spécifié.');
+  }
+
+  renderDeals(filteredDeals); // Affiche uniquement les deals filtrés
+});
+
+
+
+// Gestion de l'appui sur "Entrée" dans le champ de recherche
+document.getElementById('search-input').addEventListener('keypress', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    document.querySelector('#search-form button').click();
+  }
+});
+
 
 // Feature 1 - Browse pages
 selectPage.addEventListener('change', async (event) => {
@@ -298,7 +359,7 @@ document.getElementById('sort-select').addEventListener('change', function() {
 
 const fetchVintedSales = async (setId) => {
   try {
-    const url = `https://lego-api-blue.vercel.app/sales?id=${setId}`;
+    const url = 'https://lego-api-blue.vercel.app/sales?id=${setId}';
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -340,12 +401,12 @@ const renderVintedSales = (sales) => {
    return;
  }
 
- const salesContent = sales.map(sale => `
-   <div class="vinted-sale" id="${sale.uuid}">
+ const salesContent = sales.map(sale => 
+   `<div class="vinted-sale" id="${sale.uuid}">
       <a href="${sale.link}" target="_blank" rel="noopener noreferrer">${sale.title}</a>
       <span>Price: ${sale.price} €</span>
-    </div>
- `).join('');
+    </div>`
+ ).join('');
 
  salesContainerElement.innerHTML = salesContent;
 };
@@ -444,7 +505,7 @@ const renderLifetimeValue = (lifetime) => {
   const lifetimeElement = document.querySelector('#lifetimeValue');
 
   if (lifetimeElement) {
-    lifetimeElement.textContent = `${lifetime} days`;
+    lifetimeElement.textContent = '${lifetime} days';
   }
 };
 
