@@ -178,5 +178,84 @@ select {
     cursor: pointer;
   }
 
-  
-  
+  select {
+    margin: 10px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+label {
+    margin-right: 20px;
+    font-weight: bold;
+}
+
+.main-content {
+  margin-bottom: 100px; /* Assurez-vous d'ajuster cela selon la hauteur de votre pagination */
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  position: relative; /* ou 'absolute' si vous souhaitez le positionner spécifiquement */
+  margin-top: 50px; /* Ajustez cette valeur si nécessaire pour espacer par rapport aux cartes */
+  padding: 10px 0;
+  background-color: transparent; /* S'assure que le fond est transparent */
+  box-shadow: none; /* Supprime toute ombre */
+  border: none; /* Supprime les bordures */
+}
+
+#pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px ;
+}
+
+.pagination button {
+  margin: 0 5px;
+  padding: 5px 10px;
+  background-color: transparent; /* Boutons transparents */
+  border: 1px solid #ccc; /* Optionnel, retirez ou modifiez selon le style désiré */
+  color: #333; /* Couleur du texte, ajustez selon vos préférences */
+}
+
+.pagination button:hover {
+  background-color: #ddd; /* Couleur au survol, ajustez selon vos préférences */
+}
+
+.pagination .selected {
+  font-weight: bold;
+  background-color: #ccc; /* Fond du bouton sélectionné, ajustez selon vos préférences */
+}
+
+/* Conteneur du sélecteur */
+#show {
+  display: flex;
+  align-items: center;
+  font-size: 15px;
+  font-family: Arial, sans-serif;
+  margin-left: 30px; 
+}
+
+/* Label du sélecteur */
+#show label {
+  font-weight: bold;
+  color: #333;
+}
+
+/* Sélecteur */
+#show select {
+  padding: 5px 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+

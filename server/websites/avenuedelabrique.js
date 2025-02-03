@@ -26,7 +26,7 @@ const parse = data => {
       return {
         discount,
         price,
-        'title': $(element).attr('title'),
+        'title': $(element).attr('title')
       };
     })
     .get();

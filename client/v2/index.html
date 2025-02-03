@@ -1,108 +1,109 @@
 <!DOCTYPE html>
 <html>
-  <head>
+<head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>🧱 Lego | Predictability of a lego set deal</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-  </head>
-  <body>
+</head>
+<body>
     <!-- Header avec logo et barre de recherche -->
     <header>
-      <img src="static/images/logo.png" alt="Logo Lego">
-      <form id="search-form">
-        <input type="text" id="search-input" placeholder="Search for Lego sets...">
-        <button type="submit">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </button>
-      </form>
+        <img src="static/images/logo.png" alt="Logo Lego">
+        <form id="search-form">
+            <input type="text" id="search-input" placeholder="Search for Lego sets...">
+            <button type="submit">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+        </form>
     </header>
 
-    <!-- Options Section -->
-    <section id="options">
-      <div id="show">
-        <label for="show-select">Show:</label>
-        <select name="show" id="show-select">
-          <option value="6">6</option>
-          <option value="12">12</option>
-          <option value="24">24</option>
-        </select>
-      </div>
-      <div id="page">
-        <label for="page-select">Go to page:</label>
-        <select name="page" id="page-select"> </select>
-      </div>
-      <div id="pagination-container"></div>
-      <div id="filters">
-        <button type="button" id="filter-discount">By best discount</button>
-        <button type="button" id="filter-commented">By most commented</button>
-        <button type="button" id="filter-hot-deals">By hot deals</button>
-        <button type="button" id="filter-favorites">Show favorites</button>
-      </div>
-      <div id="sort">
-        <label for="sort-select">Sort:</label>
-        <select name="sort" id="sort-select">
-          <option value="price-asc">Cheaper</option>
-          <option value="price-desc">Expensive</option>
-          <option value="date-asc">Recently published</option>
-          <option value="date-desc">Anciently published</option>
-        </select>
-      </div>
-    </section>
+    <!-- Main content container for better control -->
+    <div class="main-content">
+        <!-- Options Section -->
+        <section id="options">
+            <div id="show">
+                <label for="show-select">Show :</label>
+                <select name="show" id="show-select">
+                    <option value="6">6</option>
+                    <option value="12">12</option>
+                    <option value="24">24</option>
+                </select>
+            </div>
+            <div id="page-select"></div>
+            <div id="filters">
+                <button type="button" id="filter-discount">By best discount</button>
+                <button type="button" id="filter-commented">By most commented</button>
+                <button type="button" id="filter-hot-deals">By hot deals</button>
+                <button type="button" id="filter-favorites">Show favorites</button>
+            </div>
+            <div id="sort">
+                <label for="sort-select">Sort:</label>
+                <select name="sort" id="sort-select">
+                    <option value="price-asc">Cheaper</option>
+                    <option value="price-desc">Expensive</option>
+                    <option value="date-asc">Recently published</option>
+                    <option value="date-desc">Anciently published</option>
+                </select>
+            </div>
+        </section>
 
-    <!-- Lego Sets Section -->
-    <section id="lego">
-      <h2>Lego sets</h2>
-      <div>
-        <label>Lego set id:</label>
-        <select id="lego-set-id-select"></select> 
-      </div>
-    </section>
+        <!-- Lego Sets Section -->
+        <section id="lego">
+            <h2>Lego sets</h2>
+            <div>
+                <label>Lego set id:</label>
+                <select id="lego-set-id-select"></select>
+            </div>
+        </section>
 
-    <!-- Indicators Section -->
-    <section id="indicators">
-      <h2>Indicators</h2>
-      <div>
-        <span>Number of deals</span>
-        <span id="nbDeals">0</span>
-      </div>
-      <div>
-        <span>Number of sales</span>
-        <span id="nbSales">0</span>
-      </div>
-      <div>
-        <span>Average price</span>
-        <span id="averagePrice">0</span>
-      </div>
-      <div>
-        <span>p5 sales price value</span>
-        <span id="p5Price">0</span>
-      </div>
-      <div>
-        <span>p25 sales price value</span>
-        <span id="p25Price">0</span>
-      </div>
-      <div>
-        <span>p50 sales price value</span>
-        <span id="p50Price">0</span>
-      </div>
-      <div>
-        <span>Lifetime value</span>
-        <span id="lifetimeValue">0 days</span>
-      </div>
-    </section>
+        <!-- Indicators Section -->
+        <section id="indicators">
+            <h2>Indicators</h2>
+            <div>
+                <span>Number of deals</span>
+                <span id="nbDeals">0</span>
+            </div>
+            <div>
+                <span>Number of sales</span>
+                <span id="nbSales">0</span>
+            </div>
+            <div>
+                <span>Average price</span>
+                <span id="averagePrice">0</span>
+            </div>
+            <div>
+                <span>p5 sales price value</span>
+                <span id="p5Price">0</span>
+            </div>
+            <div>
+                <span>p25 sales price value</span>
+                <span id="p25Price">0</span>
+            </div>
+            <div>
+                <span>p50 sales price value</span>
+                <span id="p50Price">0</span>
+            </div>
+            <div>
+                <span>Lifetime value</span>
+                <span id="lifetimeValue">0 days</span>
+            </div>
+        </section>
 
-    <!-- Deals Section -->
-    <section id="deals"></section>    
+        <!-- Deals Section -->
+        <section id="deals"></section>
 
-    <!-- Sales Section -->
-    <section id="sales">
-      <h2>Sales</h2>
-      <div id="salesContainer"></div>
-    </section>
+        <!-- Sales Section -->
+        <section id="sales">
+            <div id="salesContainer"></div>
+        </section>
+    </div>
+
+    <!-- Pagination container outside the main content -->
+    <div id="pagination-container" class="pagination"></div>
 
     <!-- Scripts -->
     <script type="text/javascript" charset="UTF-8" src="utils.js"></script>
     <script type="text/javascript" charset="UTF-8" src="portfolio.js"></script>
-  </body>
+</body>
 </html>

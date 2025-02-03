@@ -75,7 +75,7 @@ const renderDeals = deals => {
   const sectionDeals = document.querySelector('#deals');
 
   if (!deals || deals.length === 0) {
-    sectionDeals.innerHTML = '<p>No deals found for the entered search criteria.</p>';
+    sectionDeals.innerHTML = `<p>No deals found for the entered search criteria.</p>`;
     return;
   }
 
@@ -106,8 +106,8 @@ const renderDeals = deals => {
         >
           ❤
         </span>
-      </div>
-    `;
+      </div>`
+    ;
     })
     .join('');
 
@@ -146,14 +146,22 @@ const renderDeals = deals => {
  * @param  {Object} pagination
  */
 const renderPagination = pagination => {
-  const {currentPage, pageCount} = pagination;
-  const options = Array.from(
-    { length: pageCount },
-    (value, index) => `<option value="${index + 1}">${index + 1}</option>`
-  ).join('');
+  const { currentPage, pageCount } = pagination;
+  const container = document.querySelector('#pagination-container');
+  container.innerHTML =`<span>${pageCount} pages au total : </span>`;
 
-  selectPage.innerHTML = options;
-  selectPage.selectedIndex = currentPage - 1;
+  const paginationHTML = Array.from({ length: pageCount }, (v, i) => {
+      return `<button class="${i + 1 === currentPage ? 'selected' : ''}" onclick="changePage(${i + 1})">${i + 1}</button>`;
+  }).join(' ');
+
+  container.innerHTML += paginationHTML;
+};
+
+window.changePage = async (page) => {
+  const pageSize = parseInt(document.querySelector('#show-select').value);
+  const deals = await fetchDeals(page, pageSize);
+  setCurrentDeals(deals);
+  render(currentDeals, currentPagination);
 };
 
 /**
@@ -163,8 +171,9 @@ const renderPagination = pagination => {
 const renderLegoSetIds = deals => {
   const ids = getIdsFromDeals(deals);
   const options = ids.map(id => 
-    `<option value="${id}">${id}</option>`
-  ).join('');
+  `<option value="${id}">${id}</option>`
+).join('');
+
 
   selectLegoSetIds.innerHTML = options;
 };
@@ -194,8 +203,8 @@ const render = (deals, pagination) => {
  * Select the number of deals to display
  */
 selectShow.addEventListener('change', async (event) => {
-  const deals = await fetchDeals(currentPagination.currentPage, parseInt(event.target.value));
-
+  const size = parseInt(event.target.value);
+  const deals = await fetchDeals(1, size); 
   setCurrentDeals(deals);
   render(currentDeals, currentPagination);
 });
@@ -206,6 +215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   setCurrentDeals(deals);
   render(currentDeals, currentPagination);
 });
+
 
 // Listener pour la soumission du formulaire de recherche
 document.getElementById('search-form').addEventListener('submit', async (event) => {
@@ -397,7 +407,7 @@ const renderVintedSales = (sales) => {
  salesContainerElement.innerHTML = '';
 
  if (sales.length === 0) {
-   salesContainerElement.innerHTML = '<p>No sales found for the selected Lego set.</p>';
+   salesContainerElement.innerHTML = `<p>No sales found for the selected Lego set.</p>`;
    return;
  }
 
@@ -546,20 +556,21 @@ document.querySelector('#show-select').addEventListener('change', async (event) 
     
 // Feature 13 - Save as favorite
 
-const toggleFavoriteDeal = (dealId, deals) => {
-  const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-
-  const dealIndex = favorites.findIndex(favorite => favorite.uuid === dealId);
+const toggleFavoriteDeal = (dealId) => {
+  let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  const dealIndex = favorites.findIndex(fav => fav.uuid === dealId);
 
   if (dealIndex >= 0) {
-    favorites.splice(dealIndex, 1);
+      favorites.splice(dealIndex, 1);  // Retirer des favoris
   } else {
-    const deal = deals.find(d => d.uuid === dealId);
-    if (deal) {
-      favorites.push(deal);
-    }
+      const deal = currentDeals.find(deal => deal.uuid === dealId);
+      if (deal) {
+          favorites.push(deal);  // Ajouter aux favoris
+      }
   }
+
   localStorage.setItem('favorites', JSON.stringify(favorites));
+  renderDeals(currentDeals); // Rafraîchir l'affichage
 };
 
 // Feature 14 - Filter by favorite
