@@ -113,7 +113,7 @@ const renderDeals = deals => {
 
   div.innerHTML = template;
   fragment.appendChild(div);
-  sectionDeals.innerHTML = '<h2>Deals</h2>';
+  sectionDeals.innerHTML = '';
   sectionDeals.appendChild(fragment);
 
   // Ajouter les gestionnaires d'événements ici
@@ -359,7 +359,7 @@ document.getElementById('sort-select').addEventListener('change', function() {
 
 const fetchVintedSales = async (setId) => {
   try {
-    const url = 'https://lego-api-blue.vercel.app/sales?id=${setId}';
+    const url = `https://lego-api-blue.vercel.app/sales?id=${setId}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -505,7 +505,7 @@ const renderLifetimeValue = (lifetime) => {
   const lifetimeElement = document.querySelector('#lifetimeValue');
 
   if (lifetimeElement) {
-    lifetimeElement.textContent = '${lifetime} days';
+    lifetimeElement.textContent = `${lifetime} days`;
   }
 };
 

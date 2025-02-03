@@ -155,7 +155,7 @@ select {
   }
   
   .deal-button {
-    background-color: #ff6f00;
+    background-color: #50C878;
     color: #fff;
     border: none;
     padding: 10px;
@@ -167,7 +167,7 @@ select {
   }
   
   .deal-button:hover {
-    background-color: #e65c00;
+    background-color: #50C878;
   }
   
   .favorite-btn {
