@@ -1,3 +1,4 @@
+const fs = require('fs');
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
@@ -55,7 +56,7 @@ const parse = data => {
  * @param {String} url - URL to parse
  * @returns {Promise<Array|null>} Extracted deals
  */
-module.exports.scrape = async url => {
+const scrape = async url => {
   try {
     const response = await fetch(url, {
       headers: {
@@ -68,9 +69,36 @@ module.exports.scrape = async url => {
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
 
     const body = await response.text();
-    return parse(body);
+    const newDeals = parse(body) || [];
+
+    let existingDeals = [];
+
+    if (fs.existsSync('DEALS.json')) {
+      const fileContent = fs.readFileSync('DEALS.json', 'utf-8');
+      try {
+        existingDeals = JSON.parse(fileContent);
+      } catch (error) {
+        console.warn("⚠️ Fichier JSON corrompu, réécriture depuis zéro.");
+      }
+    }
+
+    const allDeals = [...existingDeals, ...newDeals].reduce((acc, deal) => {
+      if (!acc.find(d => d.id === deal.id)) {
+        acc.push(deal);
+      }
+      return acc;
+    }, []);
+
+    fs.writeFileSync('DEALS.json', JSON.stringify(allDeals, null, 2), 'utf-8');
+
   } catch (error) {
-    console.error(`Error scraping ${url}: ${error.message}`);
-    return null;
+    console.error(`❌ Erreur lors du scraping de ${url}: ${error.message}`);
   }
 };
+
+module.exports = { scrape };
+
+if (require.main === module) {
+  const url = "https://www.dealabs.com/groupe/lego";
+  scrape(url);
+}
