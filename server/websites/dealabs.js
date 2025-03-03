@@ -90,6 +90,7 @@ const scrape = async url => {
     }, []);
 
     fs.writeFileSync('DEALS.json', JSON.stringify(allDeals, null, 2), 'utf-8');
+    console.log(`✅ ${newDeals.length} nouveaux deals ajoutés ! Total : ${allDeals.length}`);
 
   } catch (error) {
     console.error(`❌ Erreur lors du scraping de ${url}: ${error.message}`);
