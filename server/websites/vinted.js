@@ -1,3 +1,4 @@
+const fs = require('fs');
 const cheerio = require('cheerio');
 const { v5: uuidv5 } = require('uuid');
 
@@ -66,15 +67,39 @@ const scrape = async url => {
       "body": null,
       "method": "GET"
     });
-     if (response.ok) {
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+    
        const body = await response.json();
-       return parseJSON(body);  // Adjusted to use JSON parsing function
-     }
-     console.error(response);
-     return null;
+       const newDeals = parseJSON(body);// Adjusted to use JSON parsing function
+
+     if (!newDeals.length) {
+      console.warn("⚠️ Aucun deal trouvé !");
+      return;
+    }
+
+    let existingDeals = [];
+
+    if (fs.existsSync('DEALSVinted.json')) {
+      try {
+        const fileContent = fs.readFileSync('DEALSVinted.json', 'utf-8');
+        existingDeals = JSON.parse(fileContent);
+      } catch (error) {
+        console.warn("⚠️ Fichier JSON corrompu, réécriture depuis zéro.");
+      }
+    }
+
+    const allDeals = [...existingDeals, ...newDeals].reduce((acc, deal) => {
+      if (!acc.find(d => d.uuid === deal.uuid)) {
+        acc.push(deal);
+      }
+      return acc;
+    }, []);
+
+    fs.writeFileSync('DEALSVinted.json', JSON.stringify(allDeals, null, 2), 'utf-8');
+    console.log(`✅ ${newDeals.length} nouveaux deals ajoutés ! Total : ${allDeals.length}`);
+
    } catch (error) {
-     console.error(error);
-     return null;
+    console.error(`❌ Erreur lors du scraping : ${error.message}`);
    }
  };
   
@@ -109,7 +134,8 @@ const parseJSON = data => {
 };
 
 // Exporting the scraping functions
-module.exports = {
-//   scrape,
-  scrapeWithCookies
-};
+module.exports = { scrapeWithCookies };
+
+if (require.main === module) {
+  scrapeWithCookies('42181');
+}
