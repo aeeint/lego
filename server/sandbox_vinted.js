@@ -1,11 +1,11 @@
 /* eslint-disable no-console, no-process-exit */
-const avenuedelabrique = require('./websites/dealabs');
+const vinted = require('./websites/vinted');
 
-async function sandbox (website = 'https://www.dealabs.com/groupe/lego') {
+async function sandbox (website = 'https://www.vinted.fr/api/v2/catalog/items?page=1&per_page=96&time=1739194384&search_text=42181&catalog_ids=&size_ids=&brand_ids=&status_ids=&material_ids=') {
   try {
     console.log(`🕵️‍♀️  browsing ${website} website`);
 
-    const deals = await avenuedelabrique.scrape(website);
+    const deals = await vinted.scrapeWithCookies(website);
 
     console.log(deals);
     console.log('done');

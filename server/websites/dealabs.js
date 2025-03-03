@@ -1,52 +1,76 @@
 const fetch = require('node-fetch');
 const cheerio = require('cheerio');
 
+
 /**
  * Parse webpage data response
- * @param  {String} data - html response
- * @return {Object} deal
+ * @param  {String} data - HTML response
+ * @return {Array} deals
  */
 const parse = data => {
   const $ = cheerio.load(data, {'xmlMode': true});
 
-  return $('div.prods a')
+  return $('div.js-threadList article') 
     .map((i, element) => {
-      const price = parseFloat(
-        $(element)
-          .find('span.prodl-prix span')
-          .text()
-      );
+      const link = $(element)
+        .find('a[data-t="threadLink"]')
+        .attr('href');
 
-      const discount = Math.abs(parseInt(
-        $(element)
-          .find('span.prodl-reduc')
-          .text()
-      ));
+      const data = JSON.parse($(element)
+        .find('div.js-vue2')
+        .attr('data-vue2'));
+
+      //console.log(data);
+
+      const thread = data.props.thread|| null;
+      const retail = thread.nextBestPrice|| null;
+      const price = thread.price|| null;
+      const discount = parseInt((1 - price / retail) * 100)|| null;
+      const temperature = +thread.temperature|| null;
+      const image = 'https://static-pepper.dealabs.com/threads/raw/${thread.mainImage.slotId}/${thread.mainImage.name}/re/300x300/qt/60/${thread.mainImage.name}.${thread.mainImage.ext}';
+      const comments = +thread.commentCount|| 0;
+      const published = thread.publishedAt|| null;
+      const title = thread.title|| null;
+      const id = thread.threadId || null; //extractSetId(title);
+
 
       return {
-        discount,
+        link, 
+        retail,
         price,
-        'title': $(element).attr('title')
+        discount,
+        temperature,
+        image,
+        comments,
+        published,
+        title,
+        id,
       };
     })
     .get();
 };
 
 /**
- * Scrape a given url page
- * @param {String} url - url to parse
- * @returns 
+ * Scrape a given URL page
+ * @param {String} url - URL to parse
+ * @returns {Promise<Array|null>} Extracted deals
  */
 module.exports.scrape = async url => {
-  const response = await fetch(url);
+  try {
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Referer': 'https://www.google.com/',
+      },
+    });
 
-  if (response.ok) {
+    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+
     const body = await response.text();
-
     return parse(body);
+  } catch (error) {
+    console.error(`Error scraping ${url}: ${error.message}`);
+    return null;
   }
-
-  console.error(response);
-
-  return null;
 };
