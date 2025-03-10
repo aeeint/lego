@@ -75,9 +75,34 @@ async function insertDealsAndSales() {
   await insertData('sales', sales);
 }
 
+/**
+ * Find all best discount deals
+ */
+async function findBestDiscounts() {
+  const db = await connectToMongoDB();
+  const collection = db.collection('deals');
+
+  try {
+    const bestDiscounts = await collection
+      .find()
+      .sort({ discount: -1 }) //ascending sort
+      .limit(10) // to display the 10 first
+      .toArray();
+
+    console.log("Meilleures réductions trouvées :", bestDiscounts);
+
+    return bestDiscounts;
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des meilleures réductions :", error);
+    return [];
+  }
+}
+
+
 // Exécute la fonction si le fichier est lancé directement
 if (require.main === module) {
-  insertDealsAndSales();
+  //insertDealsAndSales();
+  findBestDiscounts();
 }
 
 module.exports = { insertDealsAndSales };
