@@ -1,141 +1,169 @@
-const fs = require('fs');
-const cheerio = require('cheerio');
-const { v5: uuidv5 } = require('uuid');
+const fs = require("fs");
+const path = require("path");
+const { v5: uuidv5 } = require("uuid");
+const fetch = require("node-fetch");
 
 /**
- * Parse webpage HTML response
- * @param {String} data - html response
- * @return {Object} deals
+ * Liste des ID LEGO à scraper
  */
-const parseHTML = data => {
-  const $ = cheerio.load(data, { 'xmlMode': true });
-
-  return $('div.prods a')
-    .map((i, element) => {
-      const price = parseFloat($(element).find('span.prodl-prix span').text());
-      const discount = Math.abs(parseInt($(element).find('span.prodl-reduc').text()));
-
-      return {
-        discount,
-        price,
-        'title': $(element).attr('title')
-      };
-    })
-    .get();
-};
+const LEGO_IDS = [
+  "42171", "31212", "42202", "31213", "72037", "76435", "60453", "72032", "71437",
+  "60444", "71438", "42158", "71411", "60445", "76919", "21061", "77071", "77073",
+  "75405", "42172", "43272", "76291", "42174", "10338", "42182"
+];
 
 /**
- * Scrape a given url page
- * @param {String} url - url to parse
- * @returns 
+ * Lit un fichier JSON
+ * @param {String} filename - Nom du fichier JSON
+ * @returns {Array} - Contenu du fichier JSON
  */
-const scrape = async url => {
-  const response = await fetch(url);
-
-  if (response.ok) {
-    const body = await response.text();
-    return parseHTML(body);
-  }
-
-  console.error(response);
-  return null;
-};
-
-// New code for scraping with predefined cookies and headers
- const scrapeWithCookies = async searchText => {
-   try {
-     const response = await fetch("https://www.vinted.fr/api/v2/catalog/items?page=1&per_page=96&time=1741623480&search_text=lego&catalog_ids=&size_ids=&brand_ids=&status_ids=&color_ids=&material_ids=", {
-      "headers": {
-        "accept": "application/json, text/plain, */*",
-        "accept-language": "fr",
-        "cache-control": "no-cache",
-        "pragma": "no-cache",
-        "priority": "u=1, i",
-        "sec-ch-ua": "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"",
-        "sec-ch-ua-mobile": "?0",
-        "sec-ch-ua-platform": "\"Windows\"",
-        "sec-fetch-dest": "empty",
-        "sec-fetch-mode": "cors",
-        "sec-fetch-site": "same-origin",
-        "x-anon-id": "5a1fd8c7-c590-4fdc-9554-f0dc0e632abe",
-        "x-csrf-token": "75f6c9fa-dc8e-4e52-a000-e09dd4084b3e",
-        "x-money-object": "true",
-        "cookie": "v_udt=ZXRtRTlSeFoxQndxSU1BK3U0NUVYb0tRUGVsMy0tcm1qczNDeDhuWTBxRXNhQy0tKzdJVXY3enhHdGNyWDhERkk1QkdpZz09; anonymous-locale=fr; anon_id=5a1fd8c7-c590-4fdc-9554-f0dc0e632abe; OptanonAlertBoxClosed=2025-01-24T17:37:25.879Z; eupubconsent-v2=CQLu-NgQLu-NgAcABBENBZFgAAAAAAAAAChQAAAAAAFBIIQACAAFwAUABUADgAHgAQQAyADUAHgARAAmABVADeAHoAPwAhIBDAESAI4ASwAmgBWgDDgGUAZYA2QB3wD2APiAfYB-gEAAIpARcBGACNAFBAKgAVcAuYBigDRAG0ANwAcQBDoCRAE7AKHAUeApEBTYC2AFyALvAXmAw0BkgDJwGXAM5gawBrIDYwG3gN1AcEA5MBy4DxwHtAQhAheEAOgAOABIAOcAg4BPwEegJFASsAm0BT4CwgF5AMQAYtAyEDIwGjANTAbQA24BugDygHyAP3AgIBAyCCIIJgQYAhWBC4cAwAARAA4ADwALgAkAB-AGgAc4A7gCAQEHAQgAn4BUAC9AHSAQgAj0BIoCVgExAJlATaApABSYCuwFqALoAYgAxYBkIDJgGjANNAamA14BtADbAG3AOPgc6Bz4DygHxAPtgfsB-4EDwIIgQYAg2BCsdBLAAXABQAFQAOAAgABdADIANQAeABEACYAFWALgAugBiADeAHoAP0AhgCJAEsAJoAUYArQBhgDKAGiANkAd4A9oB9gH6AP-AigCMAFBAKuAWIAuYBeQDFAG0ANwAcQA6gCHQEXgJEATIAnYBQ4Cj4FNAU2AqwBYoC2AFwALkAXaAu8BeYC-gGGgMeAZIAycBlUDLAMuAZyA1UBrADbwG6gOLAcmA5cB44D2gH1gQBAhaQAJgAIADQAOcAsQCPQE2gKTAXkA1MBtgDbgHPgPKAfEA_YCB4EGAINgQrIQHQAFgAUABcAFUALgAYgA3gB6AEcAO8Af4BFACUgFBAKuAXMAxQBtADqQKaApsBYoC0QFwALkAZOAzkBqoDxwIWkoEQACAAFgAUAA4ADwAIgATAAqgBcADFAIYAiQBHACjAFaANkAd4A_ACrgGKAOoAh0BF4CRAFHgLFAWwAvMBk4DLAGcgNYAbeA9oCB5IAeABcAdwBAACoAI9ASKAlYBNoCkwGLANyAeUA_cCCIEGCkDgABcAFAAVAA4ACCAGQAaAA8ACIAEwAKQAVQAxAB-gEMARIAowBWgDKAGiANkAd8A-wD9AIsARgAoIBVwC5gF5AMUAbQA3ACHQEXgJEATsAocBTYCxQFsALgAXIAu0BeYC-gGGgMkAZPAywDLgGcwNYA1kBt4DdQHBAOTAeOA9oCEIELSgCEAC4AJABHADnAHcAQAAkQBYgDXgHbAP-Aj0BIoCYgE2gKQAU-ArsBdAC8gGLAMmAamA14B5QD4oH7AfuBAwCB4EEwIMAQbAhW.YAAAAAAAAAAA; OTAdditionalConsentString=1~; domain_selected=true; access_token_web=eyJraWQiOiJFNTdZZHJ1SHBsQWp1MmNObzFEb3JIM2oyN0J1NS1zX09QNVB3UGlobjVNIiwiYWxnIjoiUFMyNTYifQ.eyJhcHBfaWQiOjQsImNsaWVudF9pZCI6IndlYiIsImF1ZCI6ImZyLmNvcmUuYXBpIiwiaXNzIjoidmludGVkLWlhbS1zZXJ2aWNlIiwiaWF0IjoxNzQxNjIzNDczLCJzaWQiOiJlNTg1OTVhZi0xNzQxNjIzNDczIiwic2NvcGUiOiJwdWJsaWMiLCJleHAiOjE3NDE2MzA2NzMsInB1cnBvc2UiOiJhY2Nlc3MifQ.XrgewxFdiKbr2b3IVb9whnQ_2QaC-DYgUHajIhDoH7-WWPMtd3lr7-bGtvMmbjNs4Cvy_Xp3qGD48I5JnMr3pPDEHTIs3B6z74QlStLVxZdvzgStXkIQbkylZshDbQDW4NpKaDv6k5GW1DLmTaygqVLO5jx3mc0fZaWseVOZq_rwPo_k_ru55FuJ4XlMKnN0jnfEnZq5q-BvVusWHijhy7fr1L__RryrzIx2baUn3e1b_hnlnrDy1jHBMhaVMQJTe0Uw7mG2zEgbcTJA35Jo7yZ5hyvrKi6FaLM9orHF4Jy-D5xoR1EypTTVHI22i32kVvggd3yR2VyBQMigiEcCZg; refresh_token_web=eyJraWQiOiJFNTdZZHJ1SHBsQWp1MmNObzFEb3JIM2oyN0J1NS1zX09QNVB3UGlobjVNIiwiYWxnIjoiUFMyNTYifQ.eyJhcHBfaWQiOjQsImNsaWVudF9pZCI6IndlYiIsImF1ZCI6ImZyLmNvcmUuYXBpIiwiaXNzIjoidmludGVkLWlhbS1zZXJ2aWNlIiwiaWF0IjoxNzQxNjIzNDczLCJzaWQiOiJlNTg1OTVhZi0xNzQxNjIzNDczIiwic2NvcGUiOiJwdWJsaWMiLCJleHAiOjE3NDIyMjgyNzMsInB1cnBvc2UiOiJyZWZyZXNoIn0.tmUewFr_oCXT85Q--8SIaMcJvox5v1nQtdR-dFl6GbcF_uicp9JEfH7iDgyo0C9jq7PtFY5JgMnysZX2gzL0M4BwHHcjCpRHwzLTK7-IyGE_j4VIVWuVU9r86AGpcGSfS9YFIkM9wGWkaLQ8fYk0sux5ej5VJUAZ9H77_efs5F5VGCSpbDilo73jpNDkN8BvmHjMg5bOwJWWNf68W9tJrynx6qoOYrnhhgR7BiFXTrtpIfM4mMe2yy5VMEaI2M8xXOaSnQu_SlPgIoKjivIlPJOkN_XphrdTOXq0BbGqKsk8J0io-MFx7z9lDWOgIyyt0uOUcQ8GqpIMv1iY6eh2fw; __cf_bm=07SfL9lZRO9IVSOjJ4YRl_JRn5Wa2NKlpZPMc5hnmLs-1741623473-1.0.1.1-T0bXvk.geMlbUHUcT9PSUwBsm2JRYZzvNe4hg8E3sGznUPo8vrZtEpA.FW4_bEc5hu6i9ELgSnoq2g9poHQgqNk0j4NSat7WI27RFR_3i0MgNDFOSuv57.ZHqhAihaBW; cf_clearance=a_Bkz33mUPlJPploUHCIAmiz4ehXeOGn.sKnaLr5B6c-1741623475-1.2.1.1-izuRlRQIO0sPTGmSs0DIzLGTaKOsEdUQ7neoiGjlY_KSOS5MxpH_AZE3WQURc0o1HckCsyXCK_kSIyU9cKh3Js1jv3ZSXtD7ymCYJCasmWp6w.aq.xPonDYr_PeywBJGFtsmws7vq8gpDdKmIGD_dozwBA_GOnm66sQAvXj5_QtnNWu7Mf3dlcMiTzF7XD3PKMZhutXYbysGKTNAxzYVTDC8jJ9JWQeKh5lukM9m3oleyw8hJPsBsyXMZZMAZjiJ7bJNuHNyE33Vx_ild0AUlbpcYSnTjv21HyQgYAEZuwhrn12kMMD1wGKIW1YiX.GgHBN8q5dpzBfMFjEr4K.b7zDlL4eQ9pF8F1GHiq_J9lY; v_sid=d16c2462f8e6345e90f221aed52e3a7b; viewport_size=231; datadome=KfWelNkddNouJaK07nkGI08bPzZ3nksfzkJaTUbNJ3di06emqaC33QwHmSBTQf9TGVBgQipx2Kw4JiiarTNsr_7rz~AIIRoUz4O~wD1k1YsDITdObBrz723biOUToz8D; _vinted_fr_session=Q255Z0tBQWtPNGcvOUoxKzA0am15VUw3ZXYvR09ESWI1RU8yTUhocUJnSnd1ckVvMFdXMFhXUzRsM095SkM4eFJuR0tleFJycmtXVkxKWmZSSGJ5ZGRJclNRckxjQmJmbGhaYjhPQTg3c2VFRmZFdjZZWmZFRWNPclFyVWlJekROZnZBdmNuK1BiS1ZCTHF6WGQva3ZZRUtQc2psMjh5Z2pvTWwxMTRTRUdjMmdtVXBMTkdCWVlMY25WYTdSSnFIVFo2RC9zZHNHRzRFOXVSbHhmVFUySkszYWJCalFDRDFXV0FjMjZjam1QS1FjT0pGNnY2N1FQQUJHQTlTakNyQy0tWDl3bFBYNjdEdzcrK3FkanJhN2laZz09--7c67012faa1e748ceba451a92db22fb18ee3ff83; OptanonConsent=isGpcEnabled=0&datestamp=Mon+Mar+10+2025+17%3A18%3A15+GMT%2B0100+(heure+normale+d%E2%80%99Europe+centrale)&version=202312.1.0&browserGpcFlag=0&isIABGlobal=false&consentId=5a1fd8c7-c590-4fdc-9554-f0dc0e632abe&interactionCount=20&hosts=&landingPath=NotLandingPage&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0%2CC0004%3A0%2CC0005%3A0%2CV2STACK42%3A0%2CC0015%3A0%2CC0035%3A0&genVendors=V2%3A0%2CV1%3A0%2C&AwaitingReconsent=false&geolocation=FR%3BIDF; banners_ui_state=PENDING",
-        "Referer": "https://www.vinted.fr/catalog?search_text=lego&time=1741623480",
-        "Referrer-Policy": "strict-origin-when-cross-origin"
-      },
-      "body": null,
-      "method": "GET"
-    });
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    
-       const body = await response.json();
-       const newDeals = parseJSON(body);// Adjusted to use JSON parsing function
-
-     if (!newDeals.length) {
-      console.warn("⚠️ Aucun deal trouvé !");
-      return;
-    }
-
-    let existingDeals = [];
-
-    if (fs.existsSync('DEALSVinted.json')) {
-      try {
-        const fileContent = fs.readFileSync('DEALSVinted.json', 'utf-8');
-        existingDeals = JSON.parse(fileContent);
-      } catch (error) {
-        console.warn("⚠️ Fichier JSON corrompu, réécriture depuis zéro.");
-      }
-    }
-
-    const allDeals = [...existingDeals, ...newDeals].reduce((acc, deal) => {
-      if (!acc.find(d => d.uuid === deal.uuid)) {
-        acc.push(deal);
-      }
-      return acc;
-    }, []);
-
-    fs.writeFileSync('DEALSVinted.json', JSON.stringify(allDeals, null, 2), 'utf-8');
-    console.log(`✅ ${newDeals.length} nouveaux deals ajoutés ! Total : ${allDeals.length}`);
-
-   } catch (error) {
-    console.error(`❌ Erreur lors du scraping : ${error.message}`);
-   }
- };
-  
-  scrapeWithCookies('42181').catch(console.error);
-
-/**
- * Parse JSON response
- * @param {String} data - json response
- * @return {Object} sales
- */
-const parseJSON = data => {
+function readJsonFile(filename) {
+  if (!fs.existsSync(filename)) return [];
   try {
-    const { items } = data;
-    return items.map(item => {
-      const link = item.url;
-      const price = item.total_item_price;
-      const photo = item;
-      const published = photo.high_resolution && photo.high_resolution.timestamp;
-
-      return {
-        link,
-        'price': price.amount,
-        'title': item.title,
-        'published': new Date(published * 1000).toUTCString(),
-        'uuid': uuidv5(link, uuidv5.URL)
-      };
-    });
+    return JSON.parse(fs.readFileSync(filename, "utf-8"));
   } catch (error) {
-    console.error(error);
+    console.error(`❌ Erreur de lecture du fichier ${filename} :`, error);
+    return [];
+  }
+}
+
+/**
+ * Scrape Vinted pour un ID LEGO donné, avec support de la pagination
+ * @param {String} legoId - ID du set LEGO
+ */
+const scrapeWithCookies = async (legoId) => {
+  try {
+    console.log(`🔍 Scraping en cours pour LEGO ID: ${legoId}...`);
+    let page = 1;
+    let allDeals = [];
+    let hasNextPage = true;
+
+    while (hasNextPage) {
+      const url = `https://www.vinted.fr/api/v2/catalog/items?page=${page}&per_page=96&search_text=${legoId}`;
+      console.log(`📄 Scraping page ${page} pour ${legoId}...`);
+
+      const response = await fetch(url, {
+        "headers": {
+    "accept": "application/json, text/plain, */*",
+    "accept-language": "fr",
+    "cache-control": "no-cache",
+    "pragma": "no-cache",
+    "priority": "u=1, i",
+    "sec-ch-ua": "\"Chromium\";v=\"134\", \"Not:A-Brand\";v=\"24\", \"Google Chrome\";v=\"134\"",
+    "sec-ch-ua-arch": "\"\"",
+    "sec-ch-ua-bitness": "\"64\"",
+    "sec-ch-ua-full-version": "\"134.0.6998.89\"",
+    "sec-ch-ua-full-version-list": "\"Chromium\";v=\"134.0.6998.89\", \"Not:A-Brand\";v=\"24.0.0.0\", \"Google Chrome\";v=\"134.0.6998.89\"",
+    "sec-ch-ua-mobile": "?1",
+    "sec-ch-ua-model": "\"Nexus 5\"",
+    "sec-ch-ua-platform": "\"Android\"",
+    "sec-ch-ua-platform-version": "\"6.0\"",
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-origin",
+    "x-anon-id": "5a1fd8c7-c590-4fdc-9554-f0dc0e632abe",
+    "x-csrf-token": "75f6c9fa-dc8e-4e52-a000-e09dd4084b3e",
+    "x-money-object": "true",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36",
+    "cookie": "v_udt=ZXRtRTlSeFoxQndxSU1BK3U0NUVYb0tRUGVsMy0tcm1qczNDeDhuWTBxRXNhQy0tKzdJVXY3enhHdGNyWDhERkk1QkdpZz09; anonymous-locale=fr; anon_id=5a1fd8c7-c590-4fdc-9554-f0dc0e632abe; OTAdditionalConsentString=1~; domain_selected=true; OptanonAlertBoxClosed=2025-03-10T17:25:01.254Z; eupubconsent-v2=CQODSZgQODSZgAcABBENBgFgAAAAAAAAAChQAAAAAAFBIIIACAAFwAUABUADgAHgAQQAyADUAHgARAAmABVADeAHoAPwAhIBDAESAI4ASwAmgBWgDDgGUAZYA2QB3wD2APiAfYB-gEAAIpARcBGACNAFBAKgAVcAuYBigDRAG0ANwAcQBDoCRAE7AKHAUeApEBTYC2AFyALvAXmAw0BkgDJwGXAM5gawBrIDYwG3gN1AcmA5cB44D2gIQgQvCAHQAHAAkAHOAQcAn4CPQEigJWATaAp8BYQC8gGIAMWgZCBkYDRgGpgNoAbcA3QB5QD5AH7gQEAgZBBEEEwIMAQrAhcOAYAAIgAcAB4AFwASAA_ADQAOcAdwBAICDgIQAT8AqABegDpAIQAR6AkUBKwCYgEygJtAUgApMBXYC1AF0AMQAYsAyEBkwDRgGmgNTAa8A2gBtgDbgHHwOdA58B5QD4gH2wP2A_cCB4EEQIMAQbAhWOglAALgAoACoAHAAQAAugBkAGoAPAAiABMACrAFwAXQAxABvAD0AH6AQwBEgCWAE0AKMAVoAwwBlADRAGyAO8Ae0A-wD9gIoAjABQQCrgFiALmAXkAxQBtADcAHEAOoAh0BF4CRAEyAJ2AUOAo-BTQFNgKsAWKAtgBcAC5AF2gLvAXmAvoBhoDHgGSAMnAZVAywDLgGcgNVAawA28BuoDiwHJgOXAeOA9oB9YEAQIWkACYACAA0ADnALEAj0BNoCkwF5ANTAbYA24Bz4DygHxAP2AgeBBgCDYEKyEBsABYAFAAXABVAC4AGIAN4AegB3gEUAJSAUEAq4BcwDFAG0AOpApoCmwFigLRAXAAuQBk4DOQGqgPHAhaSgRAAIAAWABQADgAPAAiABMACqAFwAMUAhgCJAEcAKMAVoA2QB3gD8AKuAYoA6gCHQEXgJEAUeAsUBbAC8wGTgMsAZyA1gBt4D2gIHkgB4AFwB3AEAAKgAj0BIoCVgE2gKTAYsA3IB5QD9wIIgQYKQNgAFwAUABUADgAIIAZABoADwAIgATAAqgBiAD9AIYAiQBRgCtAGUANEAbIA74B9gH6ARYAjABQQCrgFzALyAYoA2gBuAEOgIvASIAnYBQ4CmwFigLYAXAAuQBdoC8wF9AMNAZIAyeBlgGXAM5gawBrIDbwG6gOTAeOA9oCEIELSgCEAC4AJABHADnAHcAQAAkQBYgDXgHbAP-Aj0BIoCYgE2gKQAU-ArsBdAC8gGLAMmAamA14B5QD4oH7AfuBAwCB4EEwIMAQbAhWA.YAAAAAAAAAAA; v_sid=e58595af-1741623473; access_token_web=eyJraWQiOiJFNTdZZHJ1SHBsQWp1MmNObzFEb3JIM2oyN0J1NS1zX09QNVB3UGlobjVNIiwiYWxnIjoiUFMyNTYifQ.eyJhcHBfaWQiOjQsImNsaWVudF9pZCI6IndlYiIsImF1ZCI6ImZyLmNvcmUuYXBpIiwiaXNzIjoidmludGVkLWlhbS1zZXJ2aWNlIiwiaWF0IjoxNzQxOTUwMDk3LCJzaWQiOiJlNTg1OTVhZi0xNzQxNjIzNDczIiwic2NvcGUiOiJwdWJsaWMiLCJleHAiOjE3NDE5NTcyOTcsInB1cnBvc2UiOiJhY2Nlc3MifQ.HmbmLre_dURcie4Z3CCa-sGAuD2_B3GbVRANp9TAO7h6REH_mqdRBUGtWSIwK6515thZj2F8F6k1xv0lykXuHbFxOOEBbsgbDAfHxP-Jweo_FDhIGh7oL5skMMG2mvUoxIJvJpgJnqflaaWgkoP0gce-JJi6LpGsfzIbvN_gP9XyDxVMh5_XDZCaERd36BF7aGNtj1pDFqPcf9HeBU0LdW6Utctr2iSlF-z5h1oP7-cng2iwQdIRRybxuDbJ7l-NZHT2g-IPo0N6hRMfICPv6Sqd2y24J7JZiW8opXu12gdP6t0lqoSV-Apt5ymWpdBUyStMTadkLID-YC3JFmGmkA; refresh_token_web=eyJraWQiOiJFNTdZZHJ1SHBsQWp1MmNObzFEb3JIM2oyN0J1NS1zX09QNVB3UGlobjVNIiwiYWxnIjoiUFMyNTYifQ.eyJhcHBfaWQiOjQsImNsaWVudF9pZCI6IndlYiIsImF1ZCI6ImZyLmNvcmUuYXBpIiwiaXNzIjoidmludGVkLWlhbS1zZXJ2aWNlIiwiaWF0IjoxNzQxOTUwMDk3LCJzaWQiOiJlNTg1OTVhZi0xNzQxNjIzNDczIiwic2NvcGUiOiJwdWJsaWMiLCJleHAiOjE3NDI1NTQ4OTcsInB1cnBvc2UiOiJyZWZyZXNoIn0.u4PWae0qu-ee2TsKFiRXBBdnP-RyODDRIrWG0t36bAMJ_IBoePcXHfJJuJAs4SPCQsEaQ0JNeR_kPeUpVpo8_ZrsztjlbWYVioybESwYKc8mSVjYo6V68333rLqSS5zLz6ioTMUZTwmrBYQI40fcjQ3yzMGfjxdjeonO-RtWFoDH1caFN8MCPvkLPu2c9B_fJiwfaTFui4lBFk4kY6umFdxf65u_OWJ1xnSaUX3oCUGGFeIJ-DBQzWGSRC_qP58pcZ7_Ux1VM9a-XB2HYWYsRNrHcP59haLCCSFwiaFjou9EORXNehCaBlQLBk9Hguk9zuDdmecDeO8A7f9J-WtKOQ; viewport_size=594; cf_clearance=HEgOaz3iIUSkMmhZumVBZb8M7u.nQDnkOaCT5g6UOiQ-1741954349-1.2.1.1-Ar7Kf8jYRXMucexd42nv7_d4SB4RDppc_F9j6gf_U7mxyGs07nDGRb7_7Dz_h7KspQG1UXagZBkWpZOdxBmET_o7HkSLhWefxCvYH6pO1qjE.SUC0JX.PiHtpVWXFP.K0IqNaIewRLKYzz35Ky44MWKTqOghaUygoptdey1nZwhQD1lD_LQ4joow7cuUb1VXdj9L5o3mIoXXHZ7Mc5kQlu6QfXmU4gJvIe2iuLYZpOl3XCgb7Fsd1Su8rKtReQOZF8Ydy.p8tv9AGtttlW9_pFyDNr3Pc4yaW7WPT6ifSRf_Rm8SgiBLJPdX8lqjCj1JgX9Ek1e.917XSXCMg5G7KZP0IJisKIYkpKjfoXhzySpMGCcjPUJXgz12MrspKQhaZKq0AGZfqiu0AOaVsElM1xTzbjbVW7CZ0oqEG3nXuW8; datadome=TdYf2ppDXvCrbXqyUr7VSSxaB5vRsTG59D0C211KBwQFziouKwH4GEoEpRRiXPj_C0bzm0BICOu4PkMeQhSdHfC01w4dBdT3PCjEwCEjC3xFgZpqYo_gppQfqvKQyIYj; OptanonConsent=isGpcEnabled=0&datestamp=Fri+Mar+14+2025+13%3A12%3A29+GMT%2B0100+(heure+normale+d%E2%80%99Europe+centrale)&version=202312.1.0&browserGpcFlag=0&isIABGlobal=false&consentId=5a1fd8c7-c590-4fdc-9554-f0dc0e632abe&interactionCount=31&hosts=&groups=C0001%3A1%2CC0002%3A0%2CC0003%3A0%2CC0004%3A0%2CC0005%3A0%2CV2STACK42%3A0%2CC0015%3A0%2CC0035%3A0&landingPath=NotLandingPage&genVendors=V2%3A0%2CV1%3A0%2C&geolocation=FR%3B&AwaitingReconsent=false; __cf_bm=M.QPOMImVBxSAcZYBEPq6c7Ha4GHPUuyiahWgycag.E-1741954374-1.0.1.1-V1VsydWwFhTBKV.cZeeDKflXtyCEFthwGLGdUfqcreNmRQ3Agq.G_EBXsTYWcWiamCw_fizAPvqllYpQpOTi3f5sZNd7FCadoDjjZt91qOfXK3j.XaZdw7MQeCiMb4Vg; _vinted_fr_session=YWtpaWoxY1o1Z0NlRWVSM1Z4REEvcWRaUzFaclBKSXBGT3lPWW12QWlsU3oxbDBMQjQvSVhSR2VDcGdIWjN2VWV2M3krWUJEaDNUK1JpdFBjSG5na1VjcndmWkJDam12akZ0Qlc5cW5ZbVFBWUZ5KzFXTXkvTFl2Y2VUVngvLzFUd254UTIzQWFQR2E1UzA4WSs5ZWdlOU9WclNXN0ZLR2MyeXpEZ2ZRWVVlU3l3UkJKSVNDazRsMklYTHpwSWl3b1lGdC9DaHZMTFl2S1dQWm9NRUMvZWZtRHM1K1F4VGZpRkpHRzNreUwrdmhWcG1EeE5GaXVKeGVqbXNCdEIvVlUzaVlVSklxbms2RG9NYjRVQVY4Vk8yV09aYmVQTm9BZ3lDVEhxWDdCTXUxL0ZvQmRJOVlCQ2NxeU9jQmo5SEd5TDFPdS82Z3Z0NjVMVDNDNnpPZnVkRFhGZHJZUXRuRVd3Y2dhYXBpVXZQWjYzVHhNK2JyV0JyUUVwdFR1eXJsc2EyVk5Cd3Q1c0xUNkFTdFQ4b2p4Y3BSVDJZVlduNXQrbDlEVFhZbkdSeU4wL3RSMHdpc3M1YmxWS0NoOVRVOFM5UUxjNnFqcnRYbGYzSjF2MlMyTmxDRTFSNU5EdU52Tld5cUlDZHErL3pPRitUZ2NoWC90byt3NGlyQzV4VWVocERRQUZvbng1eVZmQ0ZpNVd3OG9Uc2tXUHhWaTRSbFVhRkZzQTdpeFh2c3JhN0IrazNIbFRIR2x1QzVnNjNmSmp0UU5GamFVVjhZSElqK3EyOEVBeUNXazBzSzFQR3Q1TEdWVHNGektkSCtETGQ4ajhVcS9od2RKeVhaUEVSYWc2RzVNeWR4cjJSOFMrbjc5aXBwcEJDeC92OUJCNGdRNXJxQnp1NkhGdXh0TzVueHNndVVLWEJ5L0ZHRUd5c2JBdDloQ3BoWEZxcEVQdlVNYmhHOXQ0VURYNHVFNFVqaVBjanNQWWlYbU5ucGh6OHdiRm1uOHBpNkx6aENSY2tIWGZZNnZybXRSVDBwTXdDOUV3czVoSHB1NW1JQ0tpSkVzem1kVW9wOVZGZWRHZVZYWUhNVE81NEpURmJWeGNXOTJuUzVyTk1KOW03K21ZY1VVZFVtWkc1WEVnekpJV2ZuOGpaQ2hRSXFNb0ZZWEVqTlhVVUtEaGRQQVg5Q2J3VmNVQ04rSktYTW5jcis4YzJQNlZuN3NVTzFvWkJXY0RWeld3a0d4MUp4V3JtNXYvRmNCa0FHeG4wdTlieVhjdDNkamJyN2l0UjBIVHdNTG0zTzNxbzd1a0xFNWNXSU9HRzZ1ZDVVQUlvNDd2UnRYVlhBeEh4OHhqMHlUUmdhMWhsTHJWOWpNNXU2QXVQeDJHazRRZ3FMTmV5VWtSZy9ETjJnTnAxamRJZmFHRVExdHQrc2psQzdVK040TUJyV3Evd0txV2Q3RDFlWEU1SWl5M2ZCUWtnNzdvT1d0Z1kyYkJHUldORWVBSkppbVU2ZTYyaFRWSmY0azNWcUxVQUFNNjFJSzZoNUVFQnZWUy8wYkNtNXgrTVZ4RE5qNnUzaHhDem0wWWlaU3FtOEpOTGhUeVpOeDI2aHJnZFZjZnVwN1pLOW5OZ1I5NFVldWpXZ3l2SlR5Yit0RkpyZVZNVmlrZjY3NXZuYmU1c2RyeTBEc1hFL1Q4d256VHNMNnRmdVZXSm5YcU1ZaTBPa2lCdG5tbjFKajVCTkhkNjVpcmNzb2lBUDNROHZQV09vazJlaW1HdG05SDlFQkE5U1ZFVUc3M3VaUjNMVDgzbDhRYVVmWG1vRjl5QTJRWTZuRy9RanN0TWJDcnREZGRqcm1WTkdzcEdrYno2cTFyRy9yRDVCUi93S1BRZHl2VzZCS1U4c3hrQU5sTzF0L1VMRE00V0JPOGRFT0Z2bkJPcTFxWWtGSVFaRTFwSjNReEs4UWdTeWxTdlp4S3pLQ0VjMjB6SU1VTFJ6SUFRRjJqN3dPMmRLSFNucWlKbHAwaHVLR3k5L3R3Umt5WVBpSG4zVWcvSWpjSFcyKzVMR2c0ZmEveEQvREw1YlpKeDdpNmlGZG1wdE1KWGVZQjlXakQ2R29KSVRUcVpTZWlySlh1QXhWaGdDRkJZczN0NEZXSFJqSUw1bzBEQldlVDJwcFBqQmpMR1BHdy9qNVdxVjBvekMvZEI0dG45d0hpMXkzek8zVXpTUlA0UFlJQUdoRUo1bjF0czgyUFhlRWRzdFhvb1R3R3JkYVZ2SEU3RVpiWmFZamlOVXZlKzJDeHZQcFhQRmdYVVNLSU1xYjBBWnc1ZjFUZGRrSWVZVHJoMUk2V2ZFbGovVDcra1pjNk9zdWJDSyt0T3NqTys3RWVHUUJ4Y0hJckV4aVJhRS0tNlY5ZENWR2VRK0VrVDRTb1dpT0FFQT09--5350e53b59b8400dd3c4c7181690a8adb7fc137f; banners_ui_state=PENDING",
+    "Referer" :`https://www.vinted.fr/catalog?search_text=${legoId}`,
+    "Referrer-Policy": "strict-origin-when-cross-origin"
+  },
+  "body": null,
+  "method": "GET"
+});
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+
+      const body = await response.json();
+      const newDeals = parseJSON(body, legoId);
+
+      if (!newDeals.length) {
+        console.warn(`⚠️ Aucun deal trouvé pour LEGO ID ${legoId} (page ${page}) !`);
+        hasNextPage = false;
+      } else {
+        allDeals = [...allDeals, ...newDeals];
+        page++;
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Pause 1s entre les pages
+      }
+    }
+
+    if (allDeals.length > 0) {
+      saveDeals(allDeals);
+    }
+  } catch (error) {
+    console.error(`❌ Erreur lors du scraping de l'ID ${legoId} : ${error.message}`);
+  }
+};
+
+/**
+ * Parse JSON response from Vinted API
+ * @param {Object} data - JSON response from Vinted API
+ * @param {String} legoId - The LEGO ID being searched
+ * @return {Array} - List of sales with extracted info
+ */
+const parseJSON = (data, legoId) => {
+  try {
+    return (data.items || [])
+      .filter((item) => item.brand_title && item.brand_title.toLowerCase() === "lego") // 🔥 Filtre uniquement LEGO
+      .map((item) => ({
+        id: legoId,
+        link: item.url,
+        price: item.total_item_price.amount,
+        title: item.title,
+        brand: item.brand_title,
+        published: item.photo?.high_resolution?.timestamp
+          ? new Date(item.photo.high_resolution.timestamp * 1000).toISOString()
+          : "Invalid Date",
+        uuid: uuidv5(item.url, uuidv5.URL),
+      }));
+  } catch (error) {
+    console.error("❌ Error parsing JSON:", error);
     return [];
   }
 };
 
-// Exporting the scraping functions
-module.exports = { scrapeWithCookies };
+/**
+ * Sauvegarde tous les deals dans un fichier unique "DEALSVinted.json"
+ * @param {Array} newDeals - Nouveaux deals à ajouter
+ */
+const saveDeals = (newDeals) => {
+  const filename = path.join(__dirname, "DEALSVinted.json"); // 📂 Sauvegarde dans le même dossier que le script
+  let existingDeals = readJsonFile(filename);
 
+  // Ajouter les nouveaux deals sans doublons
+  const finalDeals = [...existingDeals, ...newDeals].reduce((acc, deal) => {
+    if (!acc.find((d) => d.uuid === deal.uuid)) {
+      acc.push(deal);
+    }
+    return acc;
+  }, []);
+
+  // Sauvegarde des résultats
+  fs.writeFileSync(filename, JSON.stringify(finalDeals, null, 2), "utf-8");
+  console.log(`✅ ${newDeals.length} nouveaux deals ajoutés à ${filename} !`);
+};
+
+/**
+ * Scrape Vinted pour tous les IDs LEGO listés
+ */
+const scrapeAllLegoIds = async () => {
+  console.log(`📦 Scraping ${LEGO_IDS.length} LEGO IDs sur Vinted...`);
+
+  for (const legoId of LEGO_IDS) {
+    await scrapeWithCookies(legoId);
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Pause 2s pour éviter d'être bloqué
+  }
+
+  console.log("🎉 Scraping terminé !");
+};
+
+// Lancer le scraping pour tous les LEGO IDs
 if (require.main === module) {
-  scrapeWithCookies('42181');
+  scrapeAllLegoIds();
 }
+
+// Exporter les fonctions pour un usage externe
+module.exports = { scrapeWithCookies, scrapeAllLegoIds, LEGO_IDS };

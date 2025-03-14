@@ -1,21 +1,17 @@
 /* eslint-disable no-console, no-process-exit */
 const vinted = require('./websites/vinted');
 
-async function sandbox (website = 'https://www.vinted.fr/api/v2/catalog/items?page=1&per_page=96&time=1739194384&search_text=42181&catalog_ids=&size_ids=&brand_ids=&status_ids=&material_ids=') {
-  try {
-    console.log(`🕵️‍♀️  browsing ${website} website`);
+async function scrapeAllLegos() {
+  console.log(`📦 Scraping ${vinted.LEGO_IDS.length} LEGO IDs sur Vinted...`);
 
-    const deals = await vinted.scrapeWithCookies(website);
-
-    console.log(deals);
-    console.log('done');
-    process.exit(0);
-  } catch (e) {
-    console.error(e);
-    process.exit(1);
+  for (const legoId of vinted.LEGO_IDS) {
+    console.log(`🔍 Scraping en cours pour LEGO ID: ${legoId}...`);
+    await vinted.scrapeWithCookies(legoId);
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // Pause 2s pour éviter d’être bloqué
   }
+
+  console.log("🎉 Scraping terminé !");
+  process.exit(0);
 }
 
-const [,, eshop] = process.argv;
-
-sandbox(eshop);
+scrapeAllLegos();

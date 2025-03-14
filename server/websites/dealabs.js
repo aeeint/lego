@@ -30,7 +30,7 @@ const parse = data => {
       const temperature = +thread.temperature|| null;
       const image = 'https://static-pepper.dealabs.com/threads/raw/${thread.mainImage.slotId}/${thread.mainImage.name}/re/300x300/qt/60/${thread.mainImage.name}.${thread.mainImage.ext}';
       const comments = +thread.commentCount|| 0;
-      const published = thread.publishedAt|| null;
+      const published = thread.publishedAt ? new Date(thread.publishedAt * 1000).toISOString() : null;
       const title = thread.title|| null;
       const id = thread.threadId || null; //extractSetId(title);
 
@@ -90,7 +90,6 @@ const scrape = async url => {
     }, []);
 
     fs.writeFileSync('DEALS.json', JSON.stringify(allDeals, null, 2), 'utf-8');
-    console.log(`✅ ${newDeals.length} nouveaux deals ajoutés ! Total : ${allDeals.length}`);
 
   } catch (error) {
     console.error(`❌ Erreur lors du scraping de ${url}: ${error.message}`);

@@ -85,7 +85,7 @@ async function findBestDiscounts() {
   try {
     const bestDiscounts = await collection
       .find()
-      .sort({ discount: -1 }) //descending sort
+      .sort({ discount: -1 }) //ascending sort
       .limit(10) // to display the 10 first
       .toArray();
 
@@ -109,7 +109,7 @@ async function findMostCommentedDeals() {
     // Retrieve all deals and sort them by "comments" in descending order
     const mostCommentedDeals = await collection
       .find()
-      .sort({ comments: -1 }) // Sort in descending order by number of comments
+      .sort({ comments: -1 }) // Sort in ascending order by number of comments
       .limit(10) // Get the top 10 most commented deals
       .toArray();
 
@@ -201,18 +201,70 @@ async function findDealsSortedByDateDesc() {
       .sort({ published: -1 }) // Newest first
       .toArray();
 
-      deals.forEach(deal => {
-        deal.readableDate = new Date(deal.published * 1000).toISOString();
-      });
-
     console.log(" Deals sorted by date (descending - newest first):", deals);
 
     return deals;
   } catch (error) {
-    console.error(" Error retrieving deals sorted by date (descending):", error);
+    console.error("❌ Error retrieving deals sorted by date (descending):", error);
     return [];
   }
 }
+
+
+/**
+ * Finds all sales for a given LEGO set ID
+ * @param {String} setId - The LEGO set ID to search for
+ */
+
+const readline = require('readline');
+
+async function findSalesByLegoSetId(setId) {
+  const db = await connectToMongoDB();
+  const collection = db.collection('sales');
+
+  try {
+    return await collection.find({ id: setId }).toArray();
+  } catch (error) {
+    return [];
+  }
+}
+
+function askForLegoSetId() {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+  });
+
+  rl.question("🧱 Enter the LEGO set ID: ", async (setId) => {
+    const sales = await findSalesByLegoSetId(setId); 
+    console.log(`📊 Nombre de ventes trouvées: ${sales.length}`);
+    console.log(sales); 
+    rl.close();
+  });
+}
+
+async function findRecentSales() {
+  const db = await connectToMongoDB();
+  const collection = db.collection('sales');
+
+  try {
+    const threeWeeksAgo = new Date();
+    threeWeeksAgo.setDate(threeWeeksAgo.getDate() - 21); // Il y a 3 semaines
+
+    const recentSales = await collection.find({ 
+      published: { $gte: threeWeeksAgo.toISOString() } // Filtrer les ventes récentes
+    }).toArray();
+
+    console.log(`📊 Nombre de ventes récentes trouvées: ${recentSales.length}`);
+    console.log(recentSales);
+
+    return recentSales;
+  } catch (error) {
+    console.error("❌ Erreur lors de la récupération des ventes récentes :", error);
+    return [];
+  }
+}
+
 
 
 if (require.main === module) {
@@ -222,7 +274,9 @@ if (require.main === module) {
   //findDealsSortedByPriceAsc();
   //findDealsSortedByPriceDesc();
   //findDealsSortedByDateAsc();
-  findDealsSortedByDateDesc();
+  //findDealsSortedByDateDesc();
+  //askForLegoSetId();
+  //findRecentSales();
 
 }
 
