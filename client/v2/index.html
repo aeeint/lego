@@ -12,84 +12,73 @@
         <img src="static/images/logo.png" alt="Logo Lego">
         <form id="search-form">
             <input type="text" id="search-input" placeholder="Search for Lego sets...">
-            <button type="submit">
+            <button id="search-btn" type="submit">
                 <i class="fa-solid fa-magnifying-glass"></i>
-            </button>
+              </button>              
         </form>
     </header>
+
+    <button id="toggle-stats-btn">Show Stats</button>
 
     <!-- Main content container for better control -->
     <div class="main-content">
         <!-- Options Section -->
         <section id="options">
-            <div id="show">
-                <label for="show-select">Show :</label>
-                <select name="show" id="show-select">
-                    <option value="6">6</option>
-                    <option value="12">12</option>
-                    <option value="24">24</option>
-                </select>
-            </div>
-            <div id="page-select"></div>
-            <div id="filters">
-                <button type="button" id="filter-discount">By best discount</button>
-                <button type="button" id="filter-commented">By most commented</button>
-                <button type="button" id="filter-hot-deals">By hot deals</button>
-                <button type="button" id="filter-favorites">Show favorites</button>
-            </div>
-            <div id="sort">
-                <label for="sort-select">Sort:</label>
-                <select name="sort" id="sort-select">
-                    <option value="price-asc">Cheaper</option>
-                    <option value="price-desc">Expensive</option>
-                    <option value="date-asc">Recently published</option>
-                    <option value="date-desc">Anciently published</option>
-                </select>
-            </div>
-        </section>
+            <div class="filter-bar">
+                <div class="filter-buttons">
+                    <button type="button" id="filter-discount">By best discount</button>
+                    <button type="button" id="filter-commented">By most commented</button>
+                    <button type="button" id="filter-hot-deals">By hot deals</button>
+                    <button type="button" id="filter-favorites">Show favorites</button>
+                
+                    <div class="filter-control">
+                        <label for="sort-select">Sort:</label>
+                        <select id="sort-select">
+                            <option value="price-asc">Cheaper</option>
+                            <option value="price-desc">Expensive</option>
+                            <option value="date-asc">Recently published</option>
+                            <option value="date-desc">Anciently published</option>
+                        </select>
+                    </div>
+                
+                    <div class="filter-control">
+                        <label for="show-select">Display:</label>
+                        <select name="show" id="show-select">
+                            <option value="6">6</option>
+                            <option value="12">12</option>
+                            <option value="24">24</option>
+                        </select>
+                    </div>
+                </div>                
+          </section>
+                  
 
-        <!-- Lego Sets Section -->
+        <!-- Lego Sets Section
         <section id="lego">
             <h2>Lego sets</h2>
             <div>
                 <label>Lego set id:</label>
                 <select id="lego-set-id-select"></select>
             </div>
-        </section>
+        </section> -->
 
         <!-- Indicators Section -->
-        <section id="indicators">
-            <h2>Indicators</h2>
-            <div>
-                <span>Number of deals</span>
-                <span id="nbDeals">0</span>
+        <!-- Stats Slide Panel -->
+        <div id="stats-panel">
+            <button id="close-stats-btn" aria-label="Close stats">✖</button>
+            <div id="stats-content">
+            <h3>Statistics</h3>
+            <p><strong>Total Deals:</strong> <span id="nbDeals">0</span></p>
+            <p><strong>Total Sales:</strong> <span id="nbSales">0</span></p>
+            <p><strong>Average:</strong> <span id="averagePrice">0</span></p>
+            <p><strong>P5:</strong> <span id="p5Price">0</span></p>
+            <p><strong>P25:</strong> <span id="p25Price">0</span></p>
+            <p><strong>P50:</strong> <span id="p50Price">0</span></p>
+            <p><strong>Lifetime:</strong> <span id="lifetimeValue">0</span></p>
+            <p><strong>Sales Links:</strong><span id="stats-sales-links"></span></p>
             </div>
-            <div>
-                <span>Number of sales</span>
-                <span id="nbSales">0</span>
-            </div>
-            <div>
-                <span>Average price</span>
-                <span id="averagePrice">0</span>
-            </div>
-            <div>
-                <span>p5 sales price value</span>
-                <span id="p5Price">0</span>
-            </div>
-            <div>
-                <span>p25 sales price value</span>
-                <span id="p25Price">0</span>
-            </div>
-            <div>
-                <span>p50 sales price value</span>
-                <span id="p50Price">0</span>
-            </div>
-            <div>
-                <span>Lifetime value</span>
-                <span id="lifetimeValue">0 days</span>
-            </div>
-        </section>
-
+        </div>
+  
         <!-- Deals Section -->
         <section id="deals"></section>
 
@@ -104,6 +93,6 @@
 
     <!-- Scripts -->
     <script type="text/javascript" charset="UTF-8" src="utils.js"></script>
-    <script type="text/javascript" charset="UTF-8" src="portfolio.js"></script>
+    <script src="portfolio.js" defer></script>
 </body>
 </html>

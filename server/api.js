@@ -72,6 +72,6 @@ app.get('/sales/search', (req, res) => {
   });
 });
 
-app.listen(PORT);
+module.exports = app;
 
 console.log(`📡 Running on port ${PORT}`);
