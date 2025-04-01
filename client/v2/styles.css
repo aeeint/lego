@@ -14,7 +14,6 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #fff;
   padding: 10px 20px;
   box-shadow: none;
 }
@@ -43,7 +42,6 @@ header img {
   outline: none;
 }
 
-
 #search-input {
   height: 40px;
   padding: 0 15px;
@@ -68,13 +66,10 @@ header img {
   box-sizing: border-box;
 }
 
-
-
 #search-form button:hover {
   background-color: #f86773;
   border-color: #f86773;
 }
-
 
 #search-form button i {
   font-size: 18px;
@@ -387,7 +382,7 @@ label {
   font-size: 1.1rem;
 }
 /* ---------------- HOME PAGE ---------------- */
-/* HOME PAGE */
+
 #home-view {
   background-color: #f4f4f4;
   padding: 40px 20px;
@@ -443,7 +438,7 @@ label {
   border: 1px solid #e5b17e;
 }
 
-/* Icônes décoratives flottantes */
+/* Icônes décoratives flottantes home page*/
 .floating-icon {
   position: absolute;
   font-size: 2rem;
@@ -453,49 +448,104 @@ label {
 }
 
 .icon1 {
-  top: 120px;
+  top: 120%;
   left: 5%;
 }
 .icon2 {
-  top: 200px;
+  top:  30%;
   right: 10%;
 }
 .icon3 {
-  bottom: 150px;
+  top: 50%;
   left: 15%;
 }
 .icon4 {
-  top: 30%;
-  left: 80%;
+  top:  55%;
+  left: 70%;
 }
 .icon5 {
-  bottom: 10%;
-  right: 5%;
+  top:80%;
+  right: 3%;
+}
+.icon6 {
+  top: 85%;
+  left: 3%;
+}
+.icon7{
+top:  20%;
+left: 5%;
+}
+.icon8 {
+top:  130%;
+right: 10%;
+}
+.icon9 {
+top:  150%;
+left: 15%;
+}
+.icon10 {
+top: 195%;
+left: 95%;
+}
+.icon11 {
+top: 200%;
+right: 50%;
+}
+.icon12 {
+top: 200%;
+left: 3%;
 }
 
+
+/* Icônes décoratives flottantes app*/
 .app-icon1 {
-  top: 210px;
+  top:  35%;
   left: 5%;
 }
 .app-icon2 {
-  top: 170px;
+  top:  10%;
   right: 12%;
 }
 .app-icon3 {
-  bottom: 130px;
+  top:  20%;
   left: 33%;
 }
 .app-icon4 {
-  top: 20%;
-  left: 50%;
+  top:  195%;
+  left: 20%;
 }
 .app-icon5 {
-  bottom: 10%;
+  top:  50%;
   right: 2%;
 }
 
 .app-icon6 {
-  bottom: 45%;
+  top: 75%;
+  right: 38%;
+}
+.app-icon7 {
+  top:  135%;
+  left: 5%;
+}
+.app-icon8 {
+  top:  110%;
+  right: 12%;
+}
+.app-icon9 {
+  top:  120%;
+  left: 33%;
+}
+.app-icon10 {
+  top:  185%;
+  left: 80%;
+}
+.app-icon11 {
+  top:  150%;
+  right: 2%;
+}
+
+.app-icon12 {
+  top: 175%;
   right: 38%;
 }
 
@@ -503,6 +553,65 @@ label {
   0%   { transform: translateY(0px); }
   50%  { transform: translateY(-15px); }
   100% { transform: translateY(0px); }
+}
+
+/* ---------------- CHARACTER ---------------- */
+
+.lego-intro-container {
+  display: flex;
+  align-items: flex-start; /* alignement haut pour bulle au-dessus */
+  justify-content: center;
+  gap: 10px;
+  margin-top: 40px;
+  flex-wrap: wrap;
+  margin-left: 70px;
+}
+
+
+/* Personnage LEGO plus grand */
+.lego-character {
+  width: 300px;
+  height: auto;
+}
+
+.speech-bubble {
+  background-color: #ffffff;
+  border: 3px solid #333;
+  border-radius: 18px;
+  padding: 12px 16px;
+  max-width: 500px;
+  font-size: 1rem;
+  font-weight: 500;
+  position: relative;
+  color: #222;
+  font-family: 'Arial', sans-serif;
+  line-height: 1.4;
+  box-shadow: 4px 4px 0 #000;
+  margin-left: -70px; /* décale la bulle à droite du perso */
+  margin-top: -75px; /* remonte la bulle */
+}
+
+/* Triangle en haut à gauche (comme ton image) */
+.speech-bubble::after {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 50%;
+  width: 0;
+  height: 0;
+  border: 12px solid transparent;
+  border-right-color: #ffffff;
+  border-left: 0;
+  margin-top: -6px;
+  filter: drop-shadow(-2px 2px 0 #000);
+}
+
+.bubble-logo {
+  width: 75px; /* ⬅️ Taille réduite */
+  height: auto;
+  vertical-align: middle;
+  margin-left: 6px;
+  transform: translateY(-3px);
 }
 
 
