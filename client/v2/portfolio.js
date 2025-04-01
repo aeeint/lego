@@ -57,21 +57,26 @@ const setCurrentDeals = ({result, meta}) => {
 const fetchDeals = async (page = 1, size = 6) => {
   try {
     const response = await fetch(
-      `https://lego-api-blue.vercel.app/deals?page=${page}&size=${size}`
+      `https://lego-pdwibpqto-teanies-projects.vercel.app/deals/search?limit=9999`
     );
     const body = await response.json();
 
-    if (body.success !== true) {
-      console.error(body);
-      return {currentDeals, currentPagination};
+    if (!body.results) {
+      console.error("Erreur lors du chargement des deals", body);
+      return { result: currentDeals, meta: currentPagination };
     }
 
-    return body.data;
+    const validDeals = body.results.filter(deal => deal.id !== null);
+
+    const paginated = paginate(validDeals, page, size);
+    return paginated;
+
   } catch (error) {
-    console.error(error);
-    return {currentDeals, currentPagination};
+    console.error("Erreur réseau", error);
+    return { result: currentDeals, meta: currentPagination };
   }
 };
+
 
 const paginate = (items, page = 1, size = 6) => {
   const start = (page - 1) * size;
@@ -95,7 +100,13 @@ const renderDeals = deals => {
   const sectionDeals = document.querySelector('#deals');
 
   if (!deals || deals.length === 0) {
-    sectionDeals.innerHTML = `<p>No deals found for the entered search criteria.</p>`;
+    sectionDeals.innerHTML = `
+  <div class="no-deals-message">
+    <p>🔍 <strong>Aucun bon plan trouvé !</strong></p>
+    <p>😕 Désolé, on n'a rien trouvé avec ces critères.</p>
+    <p>🛠️ Essaie d'ajuster ta recherche et réessaye !</p>
+  </div>`;
+
     return;
   }
 
@@ -105,15 +116,15 @@ const renderDeals = deals => {
 
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
-  const template = deals
+  const template = deals.filter(deal => deal.id !== null)
   .map(deal => {
-    const isFavorite = favorites.some(favorite => favorite.uuid === deal.uuid);
+    const isFavorite = favorites.some(favorite => favorite.id === deal.id);
     return `
     <div class="deal-card">
       <div class="deal-header">
         <span class="deal-id"><strong>ID:</strong> ${deal.id}</span>
       </div>
-      <img src="${deal.photo || 'default-image.jpg'}" alt="${deal.title}" class="deal-image">
+      <img src="${deal.photo || 'https://dummyimage.com/300x200/cccccc/000000&text=Aucune+image'}" alt="${deal.title}" class="deal-image">
       <div class="deal-info">
         <h3 class="deal-title">${deal.title}</h3>
         <p class="deal-price"><strong>Price:</strong> ${deal.price} €</p>
@@ -121,7 +132,7 @@ const renderDeals = deals => {
       <button class="deal-button" data-link="${deal.link}">Je le veux !</button>
       <span 
         class="favorite-btn" 
-        data-id="${deal.uuid}" 
+        data-id="${deal.id}" 
         style="cursor: pointer; color: ${isFavorite ? 'red' : 'black'};"
       >
         ❤
@@ -264,19 +275,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // on récupère tous les deals
-  const response = await fetch('https://lego-api-blue.vercel.app/deals?page=1&size=9999');
+  const response = await fetch(`https://lego-pdwibpqto-teanies-projects.vercel.app/deals/search?limit=9999`);
   const body = await response.json();
 
-  if (body.success) {
-    allDeals = body.data.result;
-    const paginated = paginate(allDeals, 1, 6); // 6 par défaut
+  if (body.results) {
+    // 🔥 Filtrer les deals sans ID ici aussi
+    allDeals = body.results.filter(deal => deal.id !== null);
+    const paginated = paginate(allDeals, 1, 6);
     setCurrentDeals(paginated);
     render(paginated.result, paginated.meta);
   } else {
     console.error('Erreur lors du chargement des deals');
   }
 });
+
+
 
 
 
@@ -324,6 +337,67 @@ document.getElementById('search-input').addEventListener('keypress', (event) => 
   }
 });
 
+document.addEventListener('DOMContentLoaded', async () => {
+  const homeView = document.getElementById('home-view');
+  const appView = document.getElementById('app-view');
+  const topDealsContainer = document.getElementById('top-deals');
+  const discoverBtn = document.getElementById('discover-btn');
+
+  // Appel de l'API pour les meilleures offres sous un certain prix
+  const loadTopDeals = async () => {
+    try {
+      const response = await fetch('https://lego-pdwibpqto-teanies-projects.vercel.app/deals/search?limit=9999');
+      const body = await response.json();
+      const sortedByDiscount = body.results
+        .filter(deal => deal.discount !== null && deal.id !== null)
+        .sort((a, b) => parseFloat(b.discount) - parseFloat(a.discount));
+      const topDeals = sortedByDiscount.slice(0, 6);
+  
+      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
+  
+      const cardsHTML = topDeals.map(deal => {
+        const isFavorite = favorites.some(fav => fav.id === deal.id);
+        return `
+          <div class="deal-card">
+            <div class="deal-header">
+              <span class="deal-id"><strong>ID:</strong> ${deal.id}</span>
+            </div>
+            <img src="${deal.photo || 'https://dummyimage.com/300x200/cccccc/000000&text=Aucune+image'}" alt="${deal.title}" class="deal-image">
+            <div class="deal-info">
+              <h3 class="deal-title">${deal.title}</h3>
+              <p class="deal-price"><strong>Price:</strong> ${deal.price} €</p>
+            </div>
+            <button class="deal-button" data-link="${deal.link}">Je le veux !</button>
+            <span 
+              class="favorite-btn" 
+              data-id="${deal.id}" 
+              style="cursor: pointer; color: ${isFavorite ? 'red' : 'black'};"
+            >
+              ❤
+            </span>
+          </div>`;
+      }).join('');
+  
+      document.getElementById('top-deals').innerHTML = cardsHTML;
+    } catch (error) {
+      console.error("Erreur lors du chargement des top deals :", error);
+    }
+  };
+  
+
+  // Quand on clique sur "Découvrir plus"
+  if (discoverBtn) {
+    discoverBtn.addEventListener('click', () => {
+      homeView.style.display = 'none';
+      appView.style.display = 'block';
+    });
+  }
+
+  // Chargement automatique des meilleures offres
+  await loadTopDeals();
+});
+
+
 
 // Feature 1 - Browse pages
 // selectPage.addEventListener('change', async (event) => {
@@ -337,13 +411,13 @@ document.getElementById('search-input').addEventListener('keypress', (event) => 
 // });
 
 document.addEventListener('DOMContentLoaded', async () => {
-  // on récupère tous les deals
-  const response = await fetch('https://lego-api-blue.vercel.app/deals?page=1&size=9999');
+  const response = await fetch(`https://lego-pdwibpqto-teanies-projects.vercel.app/deals/search?limit=9999`);
   const body = await response.json();
 
-  if (body.success) {
-    allDeals = body.data.result;
-    const paginated = paginate(allDeals, 1, 6); // 6 par défaut
+  if (body.results) {
+    // 🔥 Filtrer les deals sans ID ici aussi
+    allDeals = body.results.filter(deal => deal.id !== null);
+    const paginated = paginate(allDeals, 1, 6);
     setCurrentDeals(paginated);
     render(paginated.result, paginated.meta);
   } else {
@@ -352,10 +426,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
+
+
 // Feature 2 - Filter by best discount
 const filterDealsByDiscount = (deals) => {
   return deals.filter(deal => {
-    return parseFloat(deal.discount) > 50;
+    return parseFloat(deal.discount) > 30;
   });
 };
 const filterDiscountBtn = document.getElementById('filter-discount');
@@ -370,7 +446,7 @@ filterDiscountBtn.addEventListener('click', () => {
 //Feature 3 - Filter by most commented
 const filterDealsByComments = (deals) => {
   return deals.filter(deal => {
-    return deal.comments >= 5;
+    return deal.comments >= 10;
   });
 };
 const filterCommentsBtn = document.getElementById('filter-commented');
@@ -464,7 +540,7 @@ const applySortAndPaginate = (sortFunction, page = 1) => {
 
 const fetchVintedSales = async (setId) => {
   try {
-    const url = `https://lego-api-blue.vercel.app/sales?id=${setId}`;
+    const url = `https://lego-pdwibpqto-teanies-projects.vercel.app/sales/search?legoSetId=${setId}`;
     const response = await fetch(url);
 
     if (!response.ok) {
@@ -473,15 +549,13 @@ const fetchVintedSales = async (setId) => {
     }
 
     const data = await response.json();
-    
-    console.log("Data received from API:", data); // Vérifier les données
-
-    return data.data.result || [];
+    return data.results || [];
   } catch (error) {
     console.error("Error fetching Vinted sales:", error);
     return [];
   }
 };
+
 
 /**
  * Render sales
@@ -588,7 +662,7 @@ const renderLifetimeValue = (lifetime) => {
 
 // Feature 11 - Open product link
 // Add this code to renderDeals :
-{/* <div class="deal" id=${deal.uuid}>
+{/* <div class="deal" id=${deal.id}>
         <span>${deal.id}</span>
         <a href="${deal.link}"target="_blank" rel="noopener noreferrer">${deal.title}</a>
         <span>${deal.price}</span>
@@ -596,7 +670,7 @@ const renderLifetimeValue = (lifetime) => {
 
 // Feature 12 - Open sold item link
 // Add this code to renderVintedSales :
-{/* <div class="vinted-sale" id="${sale.uuid}">
+{/* <div class="vinted-sale" id="${sale.id}">
       <a href="${sale.link}" target="_blank" rel="noopener noreferrer">${sale.title}</a>
       <span>Price: ${sale.price} €</span>
     </div> */}
@@ -606,29 +680,38 @@ const renderLifetimeValue = (lifetime) => {
 
 const toggleFavoriteDeal = (dealId) => {
   let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-  const dealIndex = favorites.findIndex(fav => fav.uuid === dealId);
+  const dealIndex = favorites.findIndex(fav => fav.id === dealId);
 
   if (dealIndex >= 0) {
-      favorites.splice(dealIndex, 1);  // Retirer des favoris
+    favorites.splice(dealIndex, 1);  // Supprime
   } else {
-      const deal = currentDeals.find(deal => deal.uuid === dealId);
-      if (deal) {
-          favorites.push(deal);  // Ajouter aux favoris
-      }
+    // 🔥 ici on cherche dans allDeals (pas currentDeals)
+    const deal = allDeals.find(deal => deal.id === dealId);
+    if (deal) {
+      favorites.push(deal); // Ajoute
+    }
   }
 
   localStorage.setItem('favorites', JSON.stringify(favorites));
-  renderDeals(currentDeals); // Rafraîchir l'affichage
+  renderDeals(currentDeals); // Rafraîchit
 };
+
 
 // Feature 14 - Filter by favorite
 const filterFavoriteDeals = (page = 1) => {
   const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
 
   if (favorites.length === 0) {
-    alert("No favorite deals to display.");
+    sectionDeals.innerHTML = `
+      <div class="no-deals-message">
+        <p>❤️ <strong>Pas de favoris enregistrés !</strong></p>
+        <p>Ajoutez des LEGO à vos favoris pour les retrouver ici.</p>
+      </div>`;
+    document.querySelector('#pagination-container').innerHTML = ''; // en bonus : on vide la pagination
+    spanNbDeals.innerHTML = 0; // et on met l'indicateur à 0
     return;
   }
+  
 
   const size = parseInt(document.querySelector('#show-select').value);
   const paginated = paginate(favorites, page, size);

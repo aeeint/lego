@@ -15,42 +15,55 @@ const parse = data => {
     const link = $(element).find('a[data-t="threadLink"]').attr('href');
     const dataVue2 = $(element).find('div.js-vue2').attr('data-vue2');
 
-    if (!dataVue2) return; // Éviter les erreurs si aucune donnée JSON
+    if (!dataVue2) return;
 
     const data = JSON.parse(dataVue2);
     const thread = data.props.thread || null;
     if (!thread) return;
 
-    // Vérifier si l'offre est expirée
-    if (thread.isExpired === true) {
-      console.log(`⏩ Offre expirée ignorée: ${thread.title}`);
-      return; // ❌ On passe à l'offre suivante
+    // 🔧 Image
+    let image = null;
+    if (thread.mainImage) {
+      const { path, name, ext } = thread.mainImage;
+      image = `https://static-pepper.dealabs.com/${path}/${name}.${ext}`;
     }
 
+    // 🔥 Discount
     const price = thread.price || null;
-    const nextBestPrice = thread.nextBestPrice || null; // ✅ Ajout du prix normal (référence)
+    const nextBestPrice = thread.nextBestPrice || null;
+    let discount = null;
+    if (price && nextBestPrice && nextBestPrice > 0) {
+      discount = Math.round((1 - (price / nextBestPrice)) * 100);
+    }
+
     const title = thread.title || null;
     const published = thread.publishedAt ? new Date(thread.publishedAt * 1000).toISOString() : null;
     const comments = thread.commentCount || 0;
     const temperature = thread.temperature || null;
 
-    // 🔍 Extraction de l'ID LEGO (5 chiffres dans le titre)
+    // 🔍 ID LEGO
     const idMatch = title.match(/\b\d{5}\b/);
     const id = idMatch ? idMatch[0] : null;
+
+    // ✅ Ajouter même les offres expirées
+    const expired = thread.isExpired === true;
 
     deals.push({
       link,
       price,
-      nextBestPrice, // ✅ Ajout du prix de référence
+      nextBestPrice,
       title,
       published,
       comments,
       temperature,
-      id, // ✅ ID LEGO extrait du titre
+      id,
+      photo: image,
+      discount,
+      expired
     });
   });
 
-  console.log(`📌 ${deals.length} offres valides trouvées sur cette page.`);
+  console.log(`📌 ${deals.length} offres (y compris expirées) trouvées sur cette page.`);
   return deals;
 };
 

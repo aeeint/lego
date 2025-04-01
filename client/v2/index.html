@@ -7,92 +7,134 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Header avec logo et barre de recherche -->
-    <header>
-        <img src="static/images/logo.png" alt="Logo Lego">
-        <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search for Lego sets...">
-            <button id="search-btn" type="submit">
-                <i class="fa-solid fa-magnifying-glass"></i>
-              </button>              
-        </form>
-    </header>
-
-    <button id="toggle-stats-btn">Show Stats</button>
-
-    <!-- Main content container for better control -->
-    <div class="main-content">
-        <!-- Options Section -->
-        <section id="options">
-            <div class="filter-bar">
-                <div class="filter-buttons">
-                    <button type="button" id="filter-discount">By best discount</button>
-                    <button type="button" id="filter-commented">By most commented</button>
-                    <button type="button" id="filter-hot-deals">By hot deals</button>
-                    <button type="button" id="filter-favorites">Show favorites</button>
-                
-                    <div class="filter-control">
-                        <label for="sort-select">Sort:</label>
-                        <select id="sort-select">
-                            <option value="price-asc">Cheaper</option>
-                            <option value="price-desc">Expensive</option>
-                            <option value="date-asc">Recently published</option>
-                            <option value="date-desc">Anciently published</option>
-                        </select>
-                    </div>
-                
-                    <div class="filter-control">
-                        <label for="show-select">Display:</label>
-                        <select name="show" id="show-select">
-                            <option value="6">6</option>
-                            <option value="12">12</option>
-                            <option value="24">24</option>
-                        </select>
-                    </div>
-                </div>                
-          </section>
-                  
-
-        <!-- Lego Sets Section
-        <section id="lego">
-            <h2>Lego sets</h2>
-            <div>
-                <label>Lego set id:</label>
-                <select id="lego-set-id-select"></select>
-            </div>
-        </section> -->
-
-        <!-- Indicators Section -->
-        <!-- Stats Slide Panel -->
-        <div id="stats-panel">
-            <button id="close-stats-btn" aria-label="Close stats">✖</button>
-            <div id="stats-content">
-            <h3>Statistics</h3>
-            <p><strong>Total Deals:</strong> <span id="nbDeals">0</span></p>
-            <p><strong>Total Sales:</strong> <span id="nbSales">0</span></p>
-            <p><strong>Average:</strong> <span id="averagePrice">0</span></p>
-            <p><strong>P5:</strong> <span id="p5Price">0</span></p>
-            <p><strong>P25:</strong> <span id="p25Price">0</span></p>
-            <p><strong>P50:</strong> <span id="p50Price">0</span></p>
-            <p><strong>Lifetime:</strong> <span id="lifetimeValue">0</span></p>
-            <p><strong>Sales Links:</strong><span id="stats-sales-links"></span></p>
-            </div>
-        </div>
+<!-- PAGE D'ACCUEIL SIMPLIFIÉE -->
+<section id="home-view">
+  <h1>
+    🔥 <span class="deco-badge">Top Deals</span> Meilleures Offres LEGO <span class="deco-badge">Nouveau</span> 🎉
+  </h1>
+  <p class="home-subtitle">
+    Explore les sets les plus populaires à prix mini !<br>
+    Des remises exclusives, des coups de cœur et des pépites introuvables 🧱🤑
+  </p>
   
-        <!-- Deals Section -->
-        <section id="deals"></section>
+  <button id="discover-btn">🎁 Je découvre les offres</button>
+  
+  <!-- Décorations flottantes -->
+  <div class="floating-icon icon1">🧱</div>
+  <div class="floating-icon icon2">💥</div>
+  <div class="floating-icon icon3">🎈</div>
+  <div class="floating-icon icon4">🧸</div>
+  <div class="floating-icon icon5">🚀</div>
+  <div class="floating-icon icon6">🎉</div>
 
-        <!-- Sales Section -->
-        <section id="sales">
-            <div id="salesContainer"></div>
-        </section>
-    </div>
 
-    <!-- Pagination container outside the main content -->
-    <div id="pagination-container" class="pagination"></div>
 
-    <!-- Scripts -->
-    <script type="text/javascript" charset="UTF-8" src="utils.js"></script>
-    <script src="portfolio.js" defer></script>
+  <div id="top-deals" class="deals-container"></div>
+</section>
+
+  
+  
+<!-- VUE COMPLÈTE AVEC FILTRES -->
+<section id="app-view" style="display: none;">
+    
+        <!-- Header avec logo et barre de recherche -->
+        <header>
+            <img src="static/images/logo.png" alt="Logo Lego">
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="Search for Lego sets...">
+                <button id="search-btn" type="submit">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                  </button>              
+            </form>
+        </header>
+        <p class="home-subtitle">
+            Découvre toutes les options pour trier et explorer les bons plans LEGO 🧱✨
+          </p>
+          
+          <div class="floating-icon app-icon1">🧱</div>
+          <div class="floating-icon app-icon2">💥</div>
+          <div class="floating-icon app-icon3">🎈</div>
+          <div class="floating-icon app-icon4">🧸</div>
+          <div class="floating-icon app-icon5">🚀</div>
+          <div class="floating-icon app-icon6">🎉</div>
+          
+    
+        <button id="toggle-stats-btn">Show Stats</button>
+    
+        <!-- Main content container for better control -->
+        <div class="main-content">
+            <!-- Options Section -->
+            <section id="options">
+                <div class="filter-bar">
+                    <div class="filter-buttons">
+                        <button type="button" id="filter-discount">By best discount</button>
+                        <button type="button" id="filter-commented">By most commented</button>
+                        <button type="button" id="filter-hot-deals">By hot deals</button>
+                        <button type="button" id="filter-favorites">Show favorites</button>
+                    
+                        <div class="filter-control">
+                            <label for="sort-select">Sort:</label>
+                            <select id="sort-select">
+                                <option value="price-asc">Cheaper</option>
+                                <option value="price-desc">Expensive</option>
+                                <option value="date-asc">Recently published</option>
+                                <option value="date-desc">Anciently published</option>
+                            </select>
+                        </div>
+                    
+                        <div class="filter-control">
+                            <label for="show-select">Display:</label>
+                            <select name="show" id="show-select">
+                                <option value="6">6</option>
+                                <option value="12">12</option>
+                                <option value="24">24</option>
+                            </select>
+                        </div>
+                    </div>                
+              </section>
+                      
+    
+            <!-- Lego Sets Section
+            <section id="lego">
+                <h2>Lego sets</h2>
+                <div>
+                    <label>Lego set id:</label>
+                    <select id="lego-set-id-select"></select>
+                </div>
+            </section> -->
+    
+            <!-- Indicators Section -->
+            <!-- Stats Slide Panel -->
+            <div id="stats-panel">
+                <button id="close-stats-btn" aria-label="Close stats">✖</button>
+                <div id="stats-content">
+                <h3>Statistics</h3>
+                <p><strong>Total Deals:</strong> <span id="nbDeals">0</span></p>
+                <p><strong>Total Sales:</strong> <span id="nbSales">0</span></p>
+                <p><strong>Average:</strong> <span id="averagePrice">0</span></p>
+                <p><strong>P5:</strong> <span id="p5Price">0</span></p>
+                <p><strong>P25:</strong> <span id="p25Price">0</span></p>
+                <p><strong>P50:</strong> <span id="p50Price">0</span></p>
+                <p><strong>Lifetime:</strong> <span id="lifetimeValue">0</span></p>
+                <p><strong>Sales Links:</strong><span id="stats-sales-links"></span></p>
+                </div>
+            </div>
+      
+            <!-- Deals Section -->
+            <section id="deals"></section>
+    
+            <!-- Sales Section -->
+            <section id="sales">
+                <div id="salesContainer"></div>
+            </section>
+        </div>
+    
+        <!-- Pagination container outside the main content -->
+        <div id="pagination-container" class="pagination"></div>
+    
+        <!-- Scripts -->
+        <script type="text/javascript" charset="UTF-8" src="utils.js"></script>
+        <script src="portfolio.js" defer></script>
+    </section>
 </body>
 </html>
