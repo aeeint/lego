@@ -379,6 +379,14 @@ document.addEventListener('DOMContentLoaded', async () => {
       }).join('');
   
       document.getElementById('top-deals').innerHTML = cardsHTML;
+      const favoriteButtons = document.querySelectorAll('#top-deals .favorite-btn');
+      favoriteButtons.forEach(button => {
+        button.addEventListener('click', (event) => {
+          const dealId = event.target.getAttribute('data-id');
+          toggleFavoriteDeal(dealId); 
+          loadTopDeals(); 
+        });
+      });
     } catch (error) {
       console.error("Erreur lors du chargement des top deals :", error);
     }
